@@ -63,7 +63,7 @@ Expected files in `raw/`: `molens.geojson`, `weidemolens.geojson`, `verdwenen_mo
 | Landscape 1250, 1500, 1850, 2000 | Palaeogeographic maps, Atlas van Nederland in het Holoceen (RCE / Deltares, P.C. Vos et al.) | CC BY 4.0, attribution required, changes must be indicated |
 | Street map tiles | BRT-Achtergrondkaart, Kadaster via PDOK (loaded live, not stored here) | CC BY 4.0, attribution required |
 | Typeface | Inter Tight, The Inter Project Authors (`fonts/`) | SIL Open Font License 1.1, see `fonts/OFL.txt` |
-| Floods and depolderings | Own selection and text in `js/12-events.js` | GPL-3.0-or-later, like the code |
+| Floods and depolderings | Own selection and text in `js/12-events.js` | EUPL-1.2, like the code |
 
 The CC BY credits are shown on the page: the Kadaster credit appears on the map whenever its tiles are visible, and the palaeogeographic maps are credited, with a note that they were simplified and recoloured, under "Sources & notes". `data/data.js` is derived from the sources above; because it contains the simplified palaeogeographic maps, anyone reusing it must keep that CC BY 4.0 credit.
 
@@ -73,6 +73,6 @@ The CC0 and public domain datasets need no credit, but the page credits RCE, De 
 
 Copyright © 2026 professional-cynic.
 
-The code and the project's own texts (including the curated floods and depolderings) are free software under the GNU General Public License, version 3 or (at your option) any later version. See `LICENSE`.
+The code and the project's own texts (including the curated floods and depolderings) are licensed under the European Union Public Licence, version 1.2 (EUPL-1.2). See `LICENSE`. Like the GPL it lets anyone use, change and share this work, also commercially, as long as changed versions stay under the same terms; unlike the GPL, that also applies when a changed version is only offered as an online service.
 
 The data sources and the typeface keep their own licences, listed above.

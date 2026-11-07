@@ -45,7 +45,7 @@ function tipHTML(i){
   const o=i*5,ti=ME[o],fi=ME[o+1],by=ME[o+2],ey=ME[o+3],st=ME[o+4],k=KD[i];
   const name=cleanName(NAMES[i])||tr('unnamed');let kind,when;
   if(k>=5){kind=`${tr('pump')}${V(ti)?' · '+esc(V(ti).toLowerCase()):''}${V(fi)?'<br>'+esc(V(fi)):''}`;when=`${tr('founded')} ${by} · ${tr('pst')[st]||''}`;}
-  else{const a=V(ti),b=V(fi);kind=esc([a,b].filter((s,j,arr)=>s&&arr.indexOf(s)===j).join(' · ')||tr('K')[k]);
+  else{const a=V(ti),b=V(fi);kind=esc([a,b].filter((s,j,arr)=>s&&arr.indexOf(s)===j).join(' · ')||tr('K')[k])+(FL[i]&32?` · <b>${tr('windwater')}</b>`:'');
     const bpart=by===1832&&st<2?tr('already'):by?`${tr('built')} ${by}`:tr('byu');
     if(st===10)when=`${bpart} · ${tr('replaced').replace('{y}',ey)}`;
     else if(st===0)when=`${bpart} · ${ey?tr('gone')+' '+ey:tr('goneu')}`;

@@ -72,6 +72,7 @@ for f in LOST:
     dr=(p["aandrijvin"] or "").lower()
     kind=2 if dr.startswith(("ros","tred","hond")) else 3 if dr.startswith("water") else 0 if p["hoofdcat"]=="poldermolen" else 1
     if p["type"] in("weidemolen","tjasker","paaltjasker","boktjasker"): kind=4 if p["type"]=="weidemolen" else kind
+    if dr=="wind- en watermolen": fl|=32   # driven by wind and water (watervluchtmolen): drawn as a windmill
     if b==1832: b0,b1=1750,1832; fl|=4
     elif not b: b0,b1=e-150,e-30; fl|=4
     else: b0=b1=b
@@ -99,7 +100,8 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
     if p["STAAT"]=="in aanbouw": continue
     b=yr(p["BOUWJAAR"]); fl=1; cat=p["CATEGORIE"]
     kind=0 if p["HFDFUNCTIE"]=="poldermolen" else 1
-    if cat.startswith("ros") or cat in("tredmolen","hondenkarn","koemolen"): kind=2
+    if cat=="watervluchtmolen": fl|=32   # watervluchtmolen (wind- and watermill in one): drawn as a windmill
+    elif cat.startswith("ros") or cat in("tredmolen","hondenkarn","koemolen"): kind=2
     elif cat.startswith("water") or cat=="getijdemolen": kind=3
     st={"bestaand":2,"restant":3,"herbouwd":4}[p["STAAT"]]
     if st==3: fl|=2
@@ -139,6 +141,27 @@ for (cx,cy),ids in cell.items():
                     if i<j and recs[i*8+6]<5 and recs[j*8+6]<5:
                         (a1,b1_),(a2,b2_)=LL[i],LL[j]
                         if math.hypot((a1-a2)*68000,(b1_-b2_)*111000)<=25: par[fd(i)]=fd(j)
+# second pass: the same distinctive name up to ~150 m apart is the same place too
+# (sources sometimes place the predecessors of a mill a little off, e.g. Kilsdonkse Molen, 55 m)
+normn0=lambda s:re.sub(r"\s+"," ",re.sub(r"\(.*?\)|[^a-z0-9 ]","",(s or "").lower())).split(" of ")[0].split("/")[0].strip()   # digits kept: "nr. 5" and "nr. 6" are different mills
+PLAIN={"","polder","molen","korenmolen","poldermolen","oliemolen","zaagmolen","watermolen","rosmolen","de molen","onbekend","naamloos","molen van","grondzeiler","wipmolen","standerdmolen"}
+cell2=collections.defaultdict(list)
+for i,(lon,lat) in enumerate(LL):
+    if recs[i*8+6]<5: cell2[(int(lon/0.003),int(lat/0.003))].append(i)
+nname=0;JOINED=[]
+for (cx,cy),ids in cell2.items():
+    for dx in (-1,0,1):
+        for dy in (-1,0,1):
+            for j in cell2.get((cx+dx,cy+dy),[]):
+                for i in ids:
+                    if i<j and fd(i)!=fd(j):
+                        ni,nj=normn0(names[i]),normn0(names[j])
+                        oi,oj=i*8,j*8
+                        succ=recs[oi+5]<=recs[oj+2]+5 or recs[oj+5]<=recs[oi+2]+5   # one after the other, never two at once
+                        if ni==nj and ni not in PLAIN and len(ni)>=6 and succ:
+                            (a1,b1_),(a2,b2_)=LL[i],LL[j]
+                            if math.hypot((a1-a2)*68000,(b1_-b2_)*111000)<=150: par[fd(i)]=fd(j); nname+=1; JOINED.append((names[i],names[j],round(math.hypot((a1-a2)*68000,(b1_-b2_)*111000))))
+print("joined by name within 150 m:",nname); import random; random.seed(1); [print("   ",x) for x in random.sample(JOINED,min(15,len(JOINED)))]
 groups=collections.defaultdict(list)
 for i in range(NR):
     if recs[i*8+6]<5: groups[fd(i)].append(i)
