@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wind en water: molens in Nederland, 1200–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="map" tabindex="0" role="application"></canvas>
+<div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
+<div class="scrim l"></div><div class="scrim r"></div><div class="scrim b"></div>
+
+<div id="head">
+  <div class="sc" data-i="over"></div>
+  <h1 data-i="title">Wind en water</h1>
+  <div class="sub" data-i="sub"></div>
+  <div id="year">1200</div>
+  <div id="counts">
+    <span class="dot" style="background:var(--corn)"></span><b id="cW">0</b><span data-i="cw"></span>
+    <span class="dot" style="background:var(--horse)"></span><b id="cO">0</b><span data-i="co"></span>
+    <span class="dot" style="background:var(--steam);border-radius:1px"></span><b id="cP">0</b><span data-i="cp"></span>
+  </div>
+  <div id="note"></div>
+</div>
+
+<button id="filter-btn" data-i="filters"></button>
+<div id="panel">
+  <div id="lang"><button data-l="nl">NL</button><button data-l="en">EN</button></div>
+  <button id="polder" class="toggle" aria-pressed="false"><span class="sw2"></span><span data-i="polder"></span></button>
+  <div id="polder-note" data-i="polderNote"></div>
+  <div class="sc" data-i="show"></div>
+  <div class="seg" id="mode"><button data-m="0" data-i="all"></button><button data-m="1" data-i="standing"></button><button data-m="2" data-i="lost"></button></div>
+  <div class="sc" data-i="kinds"></div>
+  <div class="chips" id="chips"></div>
+  <details id="ctd"><summary class="sc" data-i="ctype"></summary><div class="chips" id="ctchips"></div></details>
+  <details id="histd"><summary class="sc" data-i="hist"></summary><p class="hnote" data-i="histNote"></p><div id="histlist"></div></details>
+  <div class="keys">
+    <div><span class="g" style="color:#ffe9bd;text-shadow:0 0 8px #ffd98a">✕</span><span data-i="kglow"></span></div>
+    <div><span class="g" style="color:var(--stump)">•</span><span data-i="kstump"></span></div>
+    <div><span class="g" style="color:#96a2b2;font-size:10px">◦</span><span data-i="kghost"></span></div>
+    <div><span class="g" style="color:var(--corn)">⋯</span><span data-i="kmove"></span></div>
+    <div><span class="g" style="color:var(--ink2);filter:blur(1.2px)">✕</span><span data-i="kblur"></span></div>
+  </div>
+  <button id="about-btn" data-i="about"></button>
+</div>
+
+<div id="ctl"><button id="zin" title="+">+</button><button id="zout" title="−">−</button><button id="zfit" title="fit"><svg viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button><button id="bm-btn" title="map" style="display:none"><svg viewBox="0 0 16 16"><path d="M1.5 3.5l4-1.5 5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5z M5.5 2v10.5 M10.5 3.5V14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></button><a id="osm-area" target="_blank" rel="noopener" title="OpenStreetMap"><svg viewBox="0 0 16 16"><path d="M9 2h5v5M14 2L7.5 8.5M12 9.5V14H2V4h4.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></a><button id="lens-btn" title="magnifier"><svg viewBox="0 0 16 16"><circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M10.2 10.2L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+<div id="bar">
+  <button id="play" aria-label="play/pause"><svg viewBox="0 0 14 14"><path id="playicon" d="M3 1.5v11l9-5.5z"/></svg></button>
+  <canvas id="chart" tabindex="0" role="slider" aria-valuemin="1200" aria-valuemax="2026"></canvas>
+  <div id="readout"></div>
+  <button id="speed" title="speed">1×</button>
+</div>
+<div id="tip"></div>
+<div id="attr"></div>
+
+<div id="intro" class="veil">
+  <div class="card">
+    <div class="sc" data-i="over"></div>
+    <h2 data-i="title">Wind en water</h2>
+    <p data-i="lede"></p>
+    <button class="go" id="go" data-i="begin"></button>
+    <div class="sc hint" data-i="hint"></div>
+  </div>
+</div>
+<div id="about" class="veil"><div class="box"><button class="x" aria-label="close">×</button><div id="about-body"></div></div></div>
+
+<script src="data/data.js"></script>
+<script src="js/01-i18n.js"></script>
+<script src="js/02-records.js"></script>
+<script src="js/03-landscape.js"></script>
+<script src="js/04-view.js"></script>
+<script src="js/05-time.js"></script>
+<script src="js/06-ui.js"></script>
+<script src="js/07-chart.js"></script>
+<script src="js/08-interaction.js"></script>
+<script src="js/09-basemap.js"></script>
+<script src="js/10-mills.js"></script>
+<script src="js/11-lens.js"></script>
+<script src="js/12-events.js"></script>
+<script src="js/13-main.js"></script>
+</body>
+</html>
