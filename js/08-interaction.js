@@ -1,3 +1,4 @@
+'use strict';
 // ---------- pan / zoom ----------
 let drag=null;const pts=new Map();let pinch=null;
 const MAXZ=300;

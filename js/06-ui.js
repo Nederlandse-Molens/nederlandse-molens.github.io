@@ -1,3 +1,4 @@
+'use strict';
 // ---------- UI text ----------
 const chipsEl=document.getElementById('chips');
 const ORDER=[0,1,4,2,3,5,6];

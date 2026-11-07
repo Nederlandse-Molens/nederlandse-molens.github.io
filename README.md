@@ -32,6 +32,7 @@ js/                 the app, as plain scripts loaded in order (they share one sc
   12-events.js        floods and depolderings (curated list)
   13-main.js          frame loop and start-up
 data/data.js        generated data (records, landscape rasters, drained lakes)
+fonts/              Inter Tight, self-hosted (no requests to Google)
 tools/prep.py       builds data/data.js from the source downloads
 tools/tr.py         Dutch to English vocabulary for mill types and functions
 tests/smoke.py      loads the page in a headless browser and fails on JS errors
@@ -50,11 +51,22 @@ python3 tools/prep.py raw data/data.js
 
 Expected files in `raw/`: `molens.geojson`, `weidemolens.geojson`, `verdwenen_molens.geojson`, `gemalen.geojson`, `droogmakerijen.geojson`, and `paleogeografie1250nc.geojson`, `paleogeografie1500nc.geojson`, `paleogeografie1850nc.geojson`, `paleogeografie2000nc.geojson`.
 
-## Sources
+## Sources and licences
 
-- Mills, lost mills, pumping stations and drained lakes: datasets of the Rijksdienst voor het Cultureel Erfgoed (RCE).
-- Landscape: palaeogeographic maps of the Netherlands (1250, 1500, 1850, 2000).
-- Street map: BRT-Achtergrondkaart, © Kadaster / PDOK, CC BY 4.0.
-- Floods and depolderings: a curated list in `js/12-events.js`, each entry checked against a source other than an AI summary.
+| What | Source | Licence |
+|---|---|---|
+| Existing mills (`molens`) | RCE Landschapsatlas, after De Hollandsche Molen | Public domain |
+| Lost mills (`verdwenen_molens`) | RCE Landschapsatlas, after De Hollandsche Molen | CC0 1.0 |
+| Pasture mills and wind engines (`weidemolens`) | RCE Landschapsatlas, after De Hollandsche Molen | CC0 1.0 |
+| Pumping stations (`gemalen`) | RCE Landschapsatlas, after the Nederlandse Gemalenstichting | CC0 1.0 |
+| Drained lakes (`droogmakerijen`) | RCE Landschapsatlas, after the NAi Polderatlas | CC0 1.0 |
+| Landscape 1250, 1500, 1850, 2000 | Palaeogeographic maps, Atlas van Nederland in het Holoceen (RCE / Deltares, P.C. Vos et al.) | CC BY 4.0, attribution required, changes must be indicated |
+| Street map tiles | BRT-Achtergrondkaart, Kadaster via PDOK (loaded live, not stored here) | CC BY 4.0, attribution required |
+| Typeface | Inter Tight, The Inter Project Authors (`fonts/`) | SIL Open Font License 1.1, see `fonts/OFL.txt` |
+| Floods and depolderings | Own selection and text in `js/12-events.js` | Same as this project |
 
-TODO before publishing: confirm the licence terms of each RCE dataset and of the palaeogeographic maps, and choose a licence for this code.
+The CC BY credits are shown on the page: the Kadaster credit appears on the map whenever its tiles are visible, and the palaeogeographic maps are credited, with a note that they were simplified and recoloured, under "Sources & notes". `data/data.js` is derived from the sources above; because it contains the simplified palaeogeographic maps, anyone reusing it must keep that CC BY 4.0 credit.
+
+The CC0 and public domain datasets need no credit, but the page credits RCE, De Hollandsche Molen and the Gemalenstichting anyway.
+
+Licence of this project's own code and text: to be decided.

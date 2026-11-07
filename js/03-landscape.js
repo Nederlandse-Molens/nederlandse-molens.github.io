@@ -1,3 +1,4 @@
+'use strict';
 // ---------- landscape ----------
 // 0 outside,1 sea,2 salt marsh,3 peat,4 reclaimed,5 clay/river,6 town,7 dunes,8 sand,9 inland water
 const PAL=[null,null,[26,31,36],[40,35,27],[46,54,38],[31,34,35],[58,50,43],[56,51,38],[28,30,33],[13,25,40]];

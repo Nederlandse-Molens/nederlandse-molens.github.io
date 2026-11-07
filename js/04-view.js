@@ -1,3 +1,4 @@
+'use strict';
 // ---------- canvas & view ----------
 const cv=document.getElementById('map'),ctx=cv.getContext('2d');
 const FZS=1/3;                      // uncertain layer is drawn at 1/3 resolution and upscaled: a cheap, soft blur

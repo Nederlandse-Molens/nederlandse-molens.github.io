@@ -1,3 +1,4 @@
+'use strict';
 // ---------- time ----------
 let t=Y0,playing=false,spd=1,last=performance.now(),started=false;
 const hy=parseInt(location.hash.slice(1));

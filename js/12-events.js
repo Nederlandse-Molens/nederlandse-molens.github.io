@@ -1,3 +1,4 @@
+'use strict';
 // ---------- floods and depoldering (curated; year, place, short text) ----------
 const EV=[
  {yr:1404,lon:3.43,lat:51.43,k:'f',nl:'Wulpen: eiland verdwijnt',en:'Wulpen: island vanishes',tn:'Al eeuwen afgekalfd; de stormvloed van 1404 geeft het eiland de genadeslag. Het jaar is niet zeker.',te:'Eaten away for a century; the storm surge of 1404 deals the final blow. The year is uncertain.'},

@@ -1,3 +1,4 @@
+'use strict';
 // ---------- basemap tiles: PDOK BRT-Achtergrondkaart ----------
 const [GLON0,GLON1,GLAT0,GLAT1,GK]=DATA.geo;
 const toLL=(x,y)=>[GLON0+x*(GLAT1-GLAT0)/(GK*H),GLAT1-y*(GLAT1-GLAT0)/H];

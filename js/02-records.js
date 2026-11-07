@@ -1,3 +1,4 @@
+'use strict';
 // ---------- data ----------
 const W=DATA.W,H=DATA.H,R=DATA.r,ME=DATA.m,NAMES=DATA.n,TBS=DATA.tb,VNL=DATA.vnl,VEN=DATA.ven,MV=DATA.mv,N=NAMES.length,SITE=DATA.site,SITES=DATA.sites,NX=Int16Array.from(DATA.next);
 const X=new Float32Array(N),Yc=new Float32Array(N),B0=new Int16Array(N),B1=new Int16Array(N),E0=new Int16Array(N),E1=new Int16Array(N),KD=new Uint8Array(N),FL=new Uint8Array(N),PH=new Float32Array(N),SP=new Float32Array(N);

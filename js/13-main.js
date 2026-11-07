@@ -1,3 +1,4 @@
+'use strict';
 // ---------- frame loop ----------
 let skey='',sF=0,mainCov=0,lastTxt={},odd=false,ftAcc=0,ftN=0,lastDprDrop=0;
 const setTxt=(el,v)=>{if(lastTxt[el.id]!==v){lastTxt[el.id]=v;el.textContent=v;}};

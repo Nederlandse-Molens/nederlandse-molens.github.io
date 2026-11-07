@@ -1,3 +1,4 @@
+'use strict';
 // ---------- counts (precomputed once per kind × standing) ----------
 const NY=Y1-Y0+1,cntM=new Float32Array(NY),cntPol=new Float32Array(NY),cntP=new Float32Array(NY),cntW=new Float32Array(NY),cntO=new Float32Array(NY);let cmax=1,chartVer=0;
 const TBL=Array.from({length:14*12},()=>new Float32Array(NY));

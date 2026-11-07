@@ -1,3 +1,4 @@
+'use strict';
 // ---------- mills ----------
 const cEl={w:document.getElementById('cW'),o:document.getElementById('cO'),p:document.getElementById('cP'),y:document.getElementById('year')};
 const WIND=[];for(let i=0;i<N;i++){const k=KD[i];if((k<2||k===4)&&!(FL[i]&2))WIND.push(i);}

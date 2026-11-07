@@ -1,3 +1,4 @@
+'use strict';
 // ---------- magnifier ----------
 let lens={on:false,x:0,y:0,shown:false};const LR=150,LM=5;
 const lensBtn=document.getElementById('lens-btn');
