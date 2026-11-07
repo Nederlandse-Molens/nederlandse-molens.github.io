@@ -30,23 +30,65 @@ const EV=[
  {yr:2022,lon:4.237,lat:51.355,k:'d',nl:'Hedwigepolder: ontpolderd',en:'Hedwigepolder: depoldered',tn:'Polder sinds 1907, teruggegeven aan het getij van de Westerschelde.',te:'A polder since 1907, returned to the tides of the Western Scheldt.'}];
 EV.forEach(e=>{const [x,y]=toXY(e.lon,e.lat);e.px=x;e.py=y;});
 let hovEv=null;
+// does the segment (x1,y1)-(x2,y2) pass through rectangle r=[x0,y0,x1,y1]?
+function segHitsRect(x1,y1,x2,y2,r){
+  let t0=0,t1=1;const dx=x2-x1,dy=y2-y1;
+  for(const [p,q] of [[-dx,x1-r[0]],[dx,r[2]-x1],[-dy,y1-r[1]],[dy,r[3]-y1]]){
+    if(p===0){if(q<0)return false;continue;}const u=q/p;if(p<0){if(u>t1)return false;if(u>t0)t0=u;}else{if(u<t0)return false;if(u<t1)t1=u;}}
+  return t0<t1;}
+// page text and controls that sit over the map: labels avoid them (refreshed a few times a second)
+let OBS=[],obsT=0;
+function overlays(){const now=performance.now();if(now-obsT<400)return OBS;obsT=now;OBS=[];
+  for(const id of ['head','year','counts','note','panel','ctl','bar','readout']){const el=document.getElementById(id);if(!el)continue;
+    const r=el.getBoundingClientRect();if(r.width<2||r.height<2||getComputedStyle(el).visibility==='hidden'||+getComputedStyle(el).opacity===0)continue;OBS.push([r.left,r.top,r.right,r.bottom]);}
+  return OBS;}
+const boxHit=(a,b,pad)=>a[0]<b[2]+pad&&a[2]>b[0]-pad&&a[1]<b[3]+pad&&a[3]>b[1]-pad;
 function drawEvents(c,V){
+  const want0=()=>polderOn&&(V.s/fitS>=4||hovEv);
   c.save();c.font='500 12px "Inter Tight",sans-serif';c.textAlign='center';c.textBaseline='middle';
-  const placed=[],near=V.s/fitS>=4;
+  const near=V.s/fitS>=4,vis=[];
   // part of the Polder story only, and not tied to the timeline: every event shows, whatever the year
   for(const e of EV){e.lbox=null;e.hx=null;if(!polderOn)continue;const sx=V.x+e.px*V.s,sy=V.y+e.py*V.s;if(sx<-200||sy<-60||sx>cw+200||sy>ch+60)continue;
-    const col=e.k==='d'?'140,205,150':'120,172,235',hot=hovEv===e;e.hx=sx;e.hy=sy;
+    e.hx=sx;e.hy=sy;vis.push(e);}
+  // labels: try spots around the marker and take the first one that covers no other label or marker
+  // and whose connecting line crosses no other label; hovered first, then top to bottom
+  const obs=want0()?overlays():[],marks=vis.map(e=>[e.hx-7,e.hy-8,e.hx+7,e.hy+8]),boxes=[],lines=[];
+  const want=vis.filter(e=>near||hovEv===e).sort((a,b)=>(b===hovEv)-(a===hovEv)||a.hy-b.hy);
+  const CAND=[[0,-1],[0,1],[1,0],[-1,0],[1,-1],[-1,-1],[1,1],[-1,1]];
+  for(const e of want){
+    if(obs.some(b=>e.hx>=b[0]&&e.hx<=b[2]&&e.hy>=b[1]&&e.hy<=b[3]))continue;   // marker hidden under the panel or text: no label
+    const s=`${e.lbl||e.yr} · ${lang==='nl'?e.nl:e.en}`,w=c.measureText(s).width+14,h=19,sx=e.hx,sy=e.hy;
+    let best=null,bestBad=1e9;
+    for(let ring=1;ring<=4&&!(best&&bestBad===0);ring++)for(const [ux,uy] of CAND){
+      const cx=sx+ux*(ux?w/2+10+(ring-1)*18:0),cy=sy+uy*(uy?h/2+12+(ring-1)*22:0)+(ux&&!uy?0:0);
+      const box=[cx-w/2,cy-h/2,cx+w/2,cy+h/2];
+      if(box[0]<4||box[2]>cw-4||box[1]<4||box[3]>ch-4)continue;
+      // end of the connecting line: the point of the label nearest the marker
+      const lx=Math.max(box[0],Math.min(sx,box[2])),ly=Math.max(box[1],Math.min(sy,box[3]));
+      let bad=0;
+      for(const b of boxes)if(boxHit(box,b,3))bad+=10;
+      for(const b of obs)if(boxHit(box,b,2))bad+=8;
+      marks.forEach((m,k)=>{if(vis[k]!==e&&boxHit(box,m,1))bad+=4;});
+      for(const b of boxes)if(segHitsRect(sx,sy,lx,ly,b))bad+=3;
+      for(const L of lines)if(segHitsRect(L[0],L[1],L[2],L[3],box))bad+=3;
+      bad+=ring*0.01;
+      if(bad<bestBad){bestBad=bad;best={box,lx,ly,cx,cy};}
+      if(bad<1)break;}
+    if(!best)continue;
+    boxes.push(best.box);e.lbox=best.box;e.lab={s,cx:best.cx,cy:best.cy,w,lx:best.lx,ly:best.ly};
+    if(Math.hypot(best.lx-sx,best.ly-sy)>9)lines.push([sx,sy,best.lx,best.ly]);}
+  // draw: lines, then markers, then labels on top
+  for(const e of vis){if(!e.lbox)continue;const col=e.k==='d'?'140,205,150':'120,172,235',L=e.lab;
+    if(Math.hypot(L.lx-e.hx,L.ly-e.hy)>9){c.strokeStyle=`rgba(${col},.55)`;c.lineWidth=1;c.beginPath();c.moveTo(e.hx,e.hy);c.lineTo(L.lx,L.ly);c.stroke();}}
+  for(const e of vis){const col=e.k==='d'?'140,205,150':'120,172,235',sx=e.hx,sy=e.hy;
     // marker: drop for land lost to the water, diamond for land given back on purpose
-    const a=hot?1:0.85;c.globalAlpha=a;c.fillStyle=`rgb(${col})`;c.strokeStyle='rgba(6,9,15,.9)';c.lineWidth=1.5;c.beginPath();
+    c.globalAlpha=hovEv===e?1:0.85;c.fillStyle=`rgb(${col})`;c.strokeStyle='rgba(6,9,15,.9)';c.lineWidth=1.5;c.beginPath();
     if(e.k==='d'){c.moveTo(sx,sy-5);c.lineTo(sx+5,sy);c.lineTo(sx,sy+5);c.lineTo(sx-5,sy);c.closePath();}
     else{c.moveTo(sx,sy-6);c.bezierCurveTo(sx+2,sy-3,sx+4.5,sy-0.5,sx+4.5,sy+1.5);c.arc(sx,sy+1.5,4.5,0,Math.PI);c.bezierCurveTo(sx-4.5,sy-0.5,sx-2,sy-3,sx,sy-6);}
-    c.stroke();c.fill();c.globalAlpha=1;
-    if(near||hot){const s=`${e.lbl||e.yr} · ${lang==='nl'?e.nl:e.en}`,w=c.measureText(s).width+14;let ly=sy-22;
-      for(let k=0;k<8;k++){if(!placed.some(p=>Math.abs(p[0]-sx)<(p[2]+w)/2+4&&Math.abs(p[1]-ly)<21))break;ly-=21;}placed.push([sx,ly,w]);
-      c.globalAlpha=1;
-      if(ly<sy-22){c.strokeStyle=`rgba(${col},.5)`;c.lineWidth=1;c.beginPath();c.moveTo(sx,sy-7);c.lineTo(sx,ly+9);c.stroke();}
-      c.fillStyle='rgba(8,12,19,.86)';c.beginPath();c.roundRect(sx-w/2,ly-9.5,w,19,9.5);c.fill();c.strokeStyle=`rgba(${col},.35)`;c.lineWidth=1;c.stroke();
-      c.fillStyle=`rgb(${col})`;c.fillText(s,sx,ly+0.5);c.globalAlpha=1;e.lbox=[sx-w/2,ly-9.5,sx+w/2,ly+9.5];}}
+    c.stroke();c.fill();c.globalAlpha=1;}
+  for(const e of vis){if(!e.lbox)continue;const col=e.k==='d'?'140,205,150':'120,172,235',L=e.lab;
+    c.fillStyle='rgba(8,12,19,.9)';c.beginPath();c.roundRect(L.cx-L.w/2,L.cy-9.5,L.w,19,9.5);c.fill();c.strokeStyle=`rgba(${col},${hovEv===e?.8:.35})`;c.lineWidth=1;c.stroke();
+    c.fillStyle=`rgb(${col})`;c.fillText(L.s,L.cx,L.cy+0.5);}
   c.restore();}
 // an event is hit directly on its marker or its label (these win over mills underneath)
 function eventAt(mx,my){for(const e of EV){if(e.hx==null)continue;if((e.hx-mx)**2+(e.hy-my)**2<10*10)return e;const b=e.lbox;if(b&&mx>=b[0]&&mx<=b[2]&&my>=b[1]&&my<=b[3])return e;}return null;}
