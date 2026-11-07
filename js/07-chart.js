@@ -45,7 +45,7 @@ function drawChart(){
   c.fillStyle='#e8964a';c.beginPath();c.arc(cx,ys(at(cntP,t)),2.6,0,7);c.fill();
   // readout as real HTML text: crisp at any resolution, sits above the chart
   const ry=hoverYear!=null?hoverYear:Math.round(t),ri=Math.max(0,Math.min(NY-1,ry-Y0)),rx=xs(ry);
-  const sh=cw<560,roHtml=`<b>${ry}</b><i> · </i><span class="p">${fmt(cntPol[ri])} ${tr(sh?'rPolS':'rPol')}</span><i> · </i><span class="o">${fmt(cntM[ri]-cntPol[ri])} ${tr(sh?'rOthS':'rOth')}</span><i> · </i><span class="g">${fmt(cntP[ri])} ${tr(sh?'pumpsS':'pumps')}</span>`;
+  const sh=cw<560,roHtml=`<b>${ry}</b><i> · </i><span class="p">${fmt(cntPol[ri])} ${tr(sh?'rPolS':'rPol')}</span><i> · </i><span class="o">${fmt(cntM[ri]-cntPol[ri])} ${tr(sh?'rOthS':'rOth')}</span>${cntP[ri]>=0.5?`<i> · </i><span class="g">${fmt(cntP[ri])} ${tr((sh?'pumpsS':'pumps')+(Math.round(cntP[ri])===1?'1':''))}</span>`:''}`;
   if(roHtml!==lastRo){lastRo=roHtml;roEl.innerHTML=roHtml;roW=roEl.offsetWidth;}
   const rw=roW;const tx=Math.round(Math.max(8-chL,Math.min(cw-8-rw-chL,Math.max(0,Math.min(w-rw,rx-rw/2))))+chL);if(tx!==roX){roX=tx;roEl.style.transform=`translateX(${tx}px)`;}
 }

@@ -51,6 +51,8 @@ function frame(now){
   drawLens(now);
   // text: national counts (not just what's on screen), written only when they change
   setTxt(cEl.y,String(ty));setTxt(cEl.w,fmt(at(cntW,t)));setTxt(cEl.o,fmt(at(cntO,t)));setTxt(cEl.p,fmt(at(cntP,t)));
+  // the pumping-station line only appears once the first one exists
+  {const on=at(cntP,t)>=0.5,one=Math.round(at(cntP,t))===1;if(lastTxt.pOne!==one+lang){lastTxt.pOne=one+lang;cEl.p.nextElementSibling.textContent=tr(one?'cp1':'cp');}if(lastTxt.pOn!==on){lastTxt.pOn=on;for(const el of [cEl.p.previousElementSibling,cEl.p,cEl.p.nextElementSibling])el.classList.toggle('none',!on);}}
   if(ty!==lastTxt.noteY){lastTxt.noteY=ty;setNote(ty);chart.setAttribute('aria-valuenow',ty);chart.setAttribute('aria-valuetext',yearSummary(ty));}
   if(!playing&&!scrub&&ty!==lastAnnY&&now-lastAnnT>900){lastAnnY=ty;lastAnnT=now;if(started)announce(yearSummary(ty)+' '+(curNote||''));}
   drawChart();

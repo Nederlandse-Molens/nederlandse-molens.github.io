@@ -131,3 +131,6 @@ details summary::-webkit-details-marker{display:none}details summary::after{cont
 .hnote{margin:8px 0 2px;color:var(--dim);font-size:11.5px;line-height:1.45}
 #panel{max-height:calc(100vh - 230px);overflow-y:auto;scrollbar-width:thin}
 #tip svg{display:block;margin:6px 0 4px}
+
+/* counter rows that have nothing to count yet (no pumping stations before the first one) */
+.none{opacity:0;visibility:hidden;transition:opacity .6s,visibility 0s .6s}
