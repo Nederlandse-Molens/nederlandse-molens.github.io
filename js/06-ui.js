@@ -34,7 +34,7 @@ function renderUI(){
 }
 document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;try{localStorage.setItem('stilte-lang',lang);}catch(e){}renderUI();});
 let savedKinds=null;
-document.getElementById('polder').onclick=()=>{polderOn=!polderOn;updateDM(true);
+document.getElementById('polder').onclick=()=>{polderOn=!polderOn;updateDM(true);if(!polderOn){hovEv=null;if(pinned&&pinI<0){pinned=false;tip.classList.remove('pin');tip.style.display='none';}}
   if(polderOn){savedKinds=kindOn.slice();[1,0,0,0,0,1,1].forEach((v,j)=>kindOn[j]=v);}else if(savedKinds){savedKinds.forEach((v,j)=>kindOn[j]=v||kindOn[j]);savedKinds=null;}
   lkey='';renderUI();applyFilter();};
 const TOPSITES=SITES.map((m,si)=>si).filter(si=>SSIZE[si]>=4).sort((a,b)=>SSIZE[b]-SSIZE[a]||(Math.min(...SITES[a].map(j=>B1[j]))-Math.min(...SITES[b].map(j=>B1[j])))).slice(0,14);

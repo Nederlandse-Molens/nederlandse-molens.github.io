@@ -32,19 +32,18 @@ EV.forEach(e=>{const [x,y]=toXY(e.lon,e.lat);e.px=x;e.py=y;});
 let hovEv=null;
 function drawEvents(c,V){
   c.save();c.font='500 12px "Inter Tight",sans-serif';c.textAlign='center';c.textBaseline='middle';
-  const placed=[];
-  for(const e of EV){e.lbox=null;e.hx=null;if(t<e.yr)continue;const age=t-e.yr,sx=V.x+e.px*V.s,sy=V.y+e.py*V.s;if(sx<-200||sy<-60||sx>cw+200||sy>ch+60)continue;
-    const col=e.k==='d'?'140,205,150':'120,172,235',fresh=Math.max(0,1-age/14),hot=hovEv===e;e.hx=sx;e.hy=sy;
-    // pulse while the event is recent
-    if(fresh>0&&!RM){const ph=(performance.now()/1600)%1;c.strokeStyle=`rgba(${col},${0.5*fresh*(1-ph)})`;c.lineWidth=1.2;c.beginPath();c.arc(sx,sy,5+14*ph,0,6.2832);c.stroke();}
-    // marker: drop for a flood, diamond for land given back on purpose
-    const a=hot?1:0.55+0.45*fresh;c.globalAlpha=a;c.fillStyle=`rgb(${col})`;c.strokeStyle='rgba(6,9,15,.9)';c.lineWidth=1.5;c.beginPath();
+  const placed=[],near=V.s/fitS>=4;
+  // part of the Polder story only, and not tied to the timeline: every event shows, whatever the year
+  for(const e of EV){e.lbox=null;e.hx=null;if(!polderOn)continue;const sx=V.x+e.px*V.s,sy=V.y+e.py*V.s;if(sx<-200||sy<-60||sx>cw+200||sy>ch+60)continue;
+    const col=e.k==='d'?'140,205,150':'120,172,235',hot=hovEv===e;e.hx=sx;e.hy=sy;
+    // marker: drop for land lost to the water, diamond for land given back on purpose
+    const a=hot?1:0.85;c.globalAlpha=a;c.fillStyle=`rgb(${col})`;c.strokeStyle='rgba(6,9,15,.9)';c.lineWidth=1.5;c.beginPath();
     if(e.k==='d'){c.moveTo(sx,sy-5);c.lineTo(sx+5,sy);c.lineTo(sx,sy+5);c.lineTo(sx-5,sy);c.closePath();}
     else{c.moveTo(sx,sy-6);c.bezierCurveTo(sx+2,sy-3,sx+4.5,sy-0.5,sx+4.5,sy+1.5);c.arc(sx,sy+1.5,4.5,0,Math.PI);c.bezierCurveTo(sx-4.5,sy-0.5,sx-2,sy-3,sx,sy-6);}
     c.stroke();c.fill();c.globalAlpha=1;
-    if(fresh>0||hot){const s=`${e.lbl||e.yr} · ${lang==='nl'?e.nl:e.en}`,w=c.measureText(s).width+14;let ly=sy-22;
+    if(near||hot){const s=`${e.lbl||e.yr} · ${lang==='nl'?e.nl:e.en}`,w=c.measureText(s).width+14;let ly=sy-22;
       for(let k=0;k<8;k++){if(!placed.some(p=>Math.abs(p[0]-sx)<(p[2]+w)/2+4&&Math.abs(p[1]-ly)<21))break;ly-=21;}placed.push([sx,ly,w]);
-      c.globalAlpha=hot?1:Math.min(1,0.4+fresh*2);
+      c.globalAlpha=1;
       if(ly<sy-22){c.strokeStyle=`rgba(${col},.5)`;c.lineWidth=1;c.beginPath();c.moveTo(sx,sy-7);c.lineTo(sx,ly+9);c.stroke();}
       c.fillStyle='rgba(8,12,19,.86)';c.beginPath();c.roundRect(sx-w/2,ly-9.5,w,19,9.5);c.fill();c.strokeStyle=`rgba(${col},.35)`;c.lineWidth=1;c.stroke();
       c.fillStyle=`rgb(${col})`;c.fillText(s,sx,ly+0.5);c.globalAlpha=1;e.lbox=[sx-w/2,ly-9.5,sx+w/2,ly+9.5];}}
