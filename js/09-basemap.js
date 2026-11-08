@@ -70,22 +70,28 @@ const osmPt=i=>{const [lon,lat]=toLL(X[i],Yc[i]);return `https://www.openstreetm
 
 // ---------- landscape drawing: only the visible part of the raster ----------
 function landPair(){let a=KEYS[0],b=KEYS[0],f=0;if(t>=KEYS[3]){a=b=KEYS[3];}else if(t>KEYS[0]){for(let k=0;k<3;k++)if(t>=KEYS[k]&&t<KEYS[k+1]){a=KEYS[k];b=KEYS[k+1];f=(t-a)/(b-a);}}return [a,b,f];}
-function drawLand(c,V,al,b){
-  if(landReady<4||al<=0.01)return;const [a,bb,f]=landPair();
-  const sx0=Math.max(0,Math.floor((b[0]-V.x)/V.s)-1),sy0=Math.max(0,Math.floor((b[1]-V.y)/V.s)-1),sx1=Math.min(W,Math.ceil((b[2]-V.x)/V.s)+1),sy1=Math.min(H,Math.ceil((b[3]-V.y)/V.s)+1);
-  if(sx1<=sx0||sy1<=sy0)return;
-  const dx=V.x+sx0*V.s,dy=V.y+sy0*V.s,dw=(sx1-sx0)*V.s,dh=(sy1-sy0)*V.s;
+// the visible part of the raster: source rect in raster pixels and the matching screen rect
+function rasterRect(V,b){const sx0=Math.max(0,Math.floor((b[0]-V.x)/V.s)-1),sy0=Math.max(0,Math.floor((b[1]-V.y)/V.s)-1),sx1=Math.min(W,Math.ceil((b[2]-V.x)/V.s)+1),sy1=Math.min(H,Math.ceil((b[3]-V.y)/V.s)+1);
+  return sx1<=sx0||sy1<=sy0?null:[sx0,sy0,sx1-sx0,sy1-sy0,V.x+sx0*V.s,V.y+sy0*V.s,(sx1-sx0)*V.s,(sy1-sy0)*V.s];}
+// in the Polder story the drained lakes stay visible over the street map, faded but never below this
+const DM_MIN=0.4;
+function drawDM(c,V,a,b){
+  if(!dmReady||a<=0.01)return;const r=rasterRect(V,b);if(!r)return;
+  c.save();c.imageSmoothingEnabled=true;c.globalAlpha=a;c.drawImage(DMC,...r);c.restore();}
+function drawLand(c,V,al,b,dmA=polderOn?Math.max(al,DM_MIN):al){
+  if(landReady<4||al<=0.01)return;const [a,bb,f]=landPair();const r=rasterRect(V,b);if(!r)return;
   c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality=V.s/fitS>4?'low':'medium';
-  c.globalAlpha=al;c.drawImage(LAND[a],sx0,sy0,sx1-sx0,sy1-sy0,dx,dy,dw,dh);
-  if(f>0){c.globalAlpha=f*al;c.drawImage(LAND[bb],sx0,sy0,sx1-sx0,sy1-sy0,dx,dy,dw,dh);}
-  if(dmReady){c.globalAlpha=Math.max(al,polderOn?0.85:0);if(c.globalAlpha>0.01)c.drawImage(DMC,sx0,sy0,sx1-sx0,sy1-sy0,dx,dy,dw,dh);}
-  c.restore();
+  c.globalAlpha=al;c.drawImage(LAND[a],...r);
+  if(f>0){c.globalAlpha=f*al;c.drawImage(LAND[bb],...r);}
+  c.restore();drawDM(c,V,dmA,b);
 }
 const LC=document.createElement('canvas'),lcx=LC.getContext('2d');let lkey='';
 function drawLandCached(al){
   if(landReady<4||al<=0.01)return;const [a,b,f]=landPair();
   const key=[a,b,Math.round(f*30),viewVer,dpr,polderOn,dmVer].join('|');
   if(key!==lkey){lkey=key;if(LC.width!==cv.width||LC.height!==cv.height){LC.width=cv.width;LC.height=cv.height;}
-    lcx.setTransform(dpr,0,0,dpr,0,0);lcx.clearRect(0,0,cw,ch);drawLand(lcx,view,1,[0,0,cw,ch]);}
+    lcx.setTransform(dpr,0,0,dpr,0,0);lcx.clearRect(0,0,cw,ch);drawLand(lcx,view,1,[0,0,cw,ch],polderOn?0:1);}
   ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=al;ctx.drawImage(LC,0,0);ctx.globalAlpha=1;ctx.setTransform(dpr,0,0,dpr,0,0);
+  // Polder story: the drained lakes are drawn separately, so they don't fade out with the landscape when the street map comes in
+  if(polderOn)drawDM(ctx,view,Math.max(al,DM_MIN),[0,0,cw,ch]);
 }
