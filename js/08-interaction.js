@@ -66,7 +66,12 @@ function tipHTML(i){
       svg+=`<rect x="${x(Math.max(Y0,b))}" y="${r2*rh+2}" width="${Math.max(2,x(Math.min(Y1,e))-x(Math.max(Y0,b)))}" height="3.5" rx="1.5" fill="${COL[KD[j]]}" opacity="${j===i?1:.55}"${unk?' stroke-dasharray="2 2"':''}/>`;});
     svg+=`<line x1="${x(t)}" y1="0" x2="${x(t)}" y2="${Hh-12}" stroke="rgba(236,228,210,.6)"/></svg>`;
     hist=`<div class="hs"><div class="hh">${tr('onSite')}${SPLACE[si]?' · '+esc(SPLACE[si]):''}</div>${svg}${rows}</div>`;}
-  return `<div class="t">${esc(name)}</div><div class="k">${kind}</div><div class="w">${esc(when)}</div>${hist}${link}`;
+  let dr='';const pk=RPOL[i];
+  if(pk&&DM[pk-1]){const d=DM[pk-1],mem=POLREC[pk],nm2=mem.filter(j=>KD[j]<5).length,np=mem.length-nm2;
+    const cnt=[nm2?nm2+' '+tr(nm2===1?'drMill1':'drMills'):'',np?np+' '+tr(np===1?'pumps1':'pumps'):''].filter(Boolean).join(', ');
+    const src=DRS[RSRC[i]]||'';
+    dr=`<div class="dr"><b>${tr('drLake')} ${esc(d[0])}</b> (${d[2]?tr('drBefore'):d[1]}) · ${cnt}${src?`<br><span>${tr('drSrc')} ${esc(src.replace(/ - /g,', '))}</span>`:''}</div>`;}
+  return `<div class="t">${esc(name)}</div><div class="k">${kind}</div><div class="w">${esc(when)}</div>${dr}${hist}${link}`;
 }
 function placeTip(x,y){if(lens.on){x+=LR*0.72;y-=LR*0.72;}const floor=ch-(cw<900?150:180),tx=Math.min(x+16,cw-tip.offsetWidth-10),ty=Math.min(y+16,floor-tip.offsetHeight);tip.style.left=Math.max(8,tx)+'px';tip.style.top=Math.max(8,ty)+'px';}
 function hover(e){

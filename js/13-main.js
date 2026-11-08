@@ -47,6 +47,7 @@ function frame(now){
   if(sF&&useFz){ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=true;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.42;ctx.drawImage(fz,0,0,cv.width,cv.height);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.setTransform(dpr,0,0,dpr,0,0);}
   if(pinI>=0&&!(siteRun&&SITE[pinI]===siteRun.si)&&(!VIS[pinI]||(pres(pinI,t)<0.02&&!isGhost(pinI,t)))){pinned=false;pinI=-1;tip.classList.remove('pin');tip.style.display='none';}
   if(pinI>=0){const px=view.x+X[pinI]*view.s,py=view.y+Yc[pinI]*view.s,pr=RM?11:10+2*Math.sin(now/300);ctx.beginPath();ctx.arc(px,py,pr,0,6.2832);ctx.strokeStyle='rgba(236,228,210,.85)';ctx.lineWidth=1.2;ctx.stroke();}
+  {const hi=pinI>=0?pinI:hovI;if(hi>=0&&RPOL[hi])drawLakeGroup(ctx,view,RPOL[hi]);}
   drawEvents(ctx,view);drawDrainLabels(ctx,view);
   drawLens(now);
   // text: national counts (not just what's on screen), written only when they change

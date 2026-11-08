@@ -49,7 +49,7 @@ pip install pillow
 python3 tools/prep.py raw data/data.js
 ```
 
-Expected files in `raw/`: `molens.geojson`, `weidemolens.geojson`, `verdwenen_molens.geojson`, `gemalen.geojson`, `droogmakerijen.geojson`, and `paleogeografie1250nc.geojson`, `paleogeografie1500nc.geojson`, `paleogeografie1850nc.geojson`, `paleogeografie2000nc.geojson`.
+Expected files in `raw/`: `molens.geojson`, `weidemolens.geojson`, `verdwenen_molens.geojson`, `gemalen.geojson`, `droogmakerijen.geojson`, `drgmk_molens_gemalen.geojson` (optional), and `paleogeografie1250nc.geojson`, `paleogeografie1500nc.geojson`, `paleogeografie1850nc.geojson`, `paleogeografie2000nc.geojson`.
 
 ## Sources and licences
 
@@ -60,6 +60,7 @@ Expected files in `raw/`: `molens.geojson`, `weidemolens.geojson`, `verdwenen_mo
 | Pasture mills and wind engines (`weidemolens`) | RCE Landschapsatlas, after De Hollandsche Molen | CC0 1.0 |
 | Pumping stations (`gemalen`) | RCE Landschapsatlas, after the Nederlandse Gemalenstichting | CC0 1.0 |
 | Drained lakes (`droogmakerijen`) | RCE Landschapsatlas, after the NAi Polderatlas | CC0 1.0 |
+| Mills and pumping stations per drained lake (`drgmk_molens_gemalen`) | RCE Landschapsatlas, from historical maps (Blaeu, Dou, Bonne sheets and others) | CC0 1.0 |
 | Landscape 1250, 1500, 1850, 2000 | Palaeogeographic maps, Atlas van Nederland in het Holoceen (RCE / Deltares, P.C. Vos et al.) | CC BY 4.0, attribution required, changes must be indicated |
 | Street map tiles | BRT-Achtergrondkaart, Kadaster via PDOK (loaded live, not stored here) | CC BY 4.0, attribution required |
 | Typeface | Inter Tight, The Inter Project Authors (`fonts/`) | SIL Open Font License 1.1, see `fonts/OFL.txt` |

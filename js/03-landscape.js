@@ -98,3 +98,17 @@ function bodySprite(ct,k,Rd){const key=(ct*10+k)*100+Rd;let c=BODY.get(key);if(c
 function sailAtlasB(k,Rd){const key=50000+k*100+Rd;let c=ATL.get(key);if(c){ATL.delete(key);ATL.set(key,c);return c;}
   const src=sailAtlas(k,Rd);c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.filter='blur(1.5px)';g.drawImage(src,0,0);
   ATL.set(key,c);while(ATL.size>48)ATL.delete(ATL.keys().next().value);return c;}
+
+// ---------- a drained lake and the mills/pumping stations that drained it (hovered or pinned record) ----------
+let lgK=0,lgC=null;
+function drawLakeGroup(c,V,k){
+  if(dmReady&&k!==lgK){lgK=k;const bx=dmBox[k],w=bx[2]-bx[0]+1,h=bx[3]-bx[1]+1;lgC=null;
+    if(w>0&&h>0){lgC=document.createElement('canvas');lgC.width=w;lgC.height=h;const g=lgC.getContext('2d'),im=g.createImageData(w,h),d=im.data,l=dmPix[k];
+      for(let q=0;q<l.length;q++){const x=l[q]%W-bx[0],y=((l[q]/W)|0)-bx[1],o=(y*w+x)*4;d[o]=236;d[o+1]=228;d[o+2]=210;d[o+3]=70;}
+      g.putImageData(im,0,0);}}
+  if(lgC&&lgK===k){const bx=dmBox[k];c.save();c.imageSmoothingEnabled=false;c.drawImage(lgC,V.x+bx[0]*V.s,V.y+bx[1]*V.s,lgC.width*V.s,lgC.height*V.s);c.restore();}
+  const mem=POLREC[k];if(!mem)return;c.save();c.lineWidth=1.1;
+  for(const j of mem){if(!VIS[j])continue;const on=pres(j,t)>0.02,px=V.x+X[j]*V.s,py=V.y+Yc[j]*V.s;
+    if(px<-10||py<-10||px>cw+10||py>ch+10)continue;
+    c.globalAlpha=on?0.95:0.4;c.strokeStyle='rgb(236,228,210)';c.beginPath();c.arc(px,py,KD[j]>=5?8:7,0,6.2832);c.stroke();}
+  c.restore();}

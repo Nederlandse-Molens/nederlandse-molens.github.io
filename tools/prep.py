@@ -264,10 +264,50 @@ for idx,(area,q,rings,holes) in enumerate(dmp,1):
     DMT.append([q["poldernaam"],yr,unc,round(sum(xs)/len(xs),1),round(sum(ys)/len(ys),1),round(area/1e6,2),q.get("polderpeil") or ""])
 bb=io.BytesIO();dim.save(bb,"PNG",optimize=True);DMIMG="data:image/png;base64,"+base64.b64encode(bb.getvalue()).decode()
 print("drained lakes",len(DMT),"raster",len(bb.getvalue())//1024,"KB")
+# ---------- which mills and pumping stations drained which lake (RCE layer drgmk_molens_gemalen, optional) ----------
+# Each point is matched to a record we already have (Ten Bruggencate nr, gemalen.nl id, else the nearest of the
+# same sort within 150 m / 300 m). Mills with no match are drawn on old maps only: added as undated polder mills.
+DRL=[];DRS=[];nadd=0
+if os.path.exists(D+"/drgmk_molens_gemalen.geojson"):
+    idmap={q["id"]:k for k,(a,q,r,h) in enumerate(dmp,1)}
+    bytb={};cells={}
+    for i,t in enumerate(tbs):
+        if t: bytb.setdefault((recs[i*8+6]>=5,t.strip()),i)
+        lon,lat=LL[i]; cells.setdefault((round(lon*50),round(lat*80)),[]).append(i)
+    def km(a,b): return math.hypot((a[0]-b[0])*68,(a[1]-b[1])*111)
+    # a mill that could have drained a polder: a polder mill, or one whose function is unknown or about water (boezemmolen)
+    def drainer(j):
+        k0=recs[j*8+6]; fn=VNL[meta[j*5+1]].lower() if meta[j*5+1] is not None and meta[j*5+1]<len(VNL) else ""
+        return k0==0 or (k0==1 and (not fn or re.search(r"polder|boezem|bemal|water",fn)))
+    used=set(); dr_un=0
+    for f in json.load(open(D+"/drgmk_molens_gemalen.geojson"))["features"]:
+        q=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]; pump="gemaal" in q["type"]
+        k=idmap.get((q["polderID"] or "").split(" ")[0])
+        if not k: continue
+        i=bytb.get((pump,(q["ID_gemalen"] if pump else q["tenBruggec"]) or ""))
+        if i is None:
+            best=None;lim=0.3 if pump else 0.15
+            for dx in(-1,0,1):
+                for dy in(-1,0,1):
+                    for j in cells.get((round(lon*50)+dx,round(lat*80)+dy),[]):
+                        if (recs[j*8+6]>=5 if pump else not drainer(j)) or j in used: continue
+                        d=km((lon,lat),LL[j])
+                        if d<lim and (best is None or d<best[0]): best=(d,j)
+            i=best[1] if best else None
+        src=(q["bron_geo"] or "").strip()
+        if src not in DRS: DRS.append(src)
+        if i is None:
+            if pump: continue
+            n0=len(names); add(lon,lat,0,0,9999,9999,0,64,q["naam"] or "",vi(q["type"]),vi("poldermolen"),0,0,0,"")
+            if len(names)==n0: continue
+            SITE.append(-1); NEXT.append(9999); i=n0; nadd+=1
+        if i in used: continue
+        used.add(i); DRL+=[i,k,DRS.index(src)]
+print("drainage links",len(DRL)//3,"of which mills only on old maps (added, undated)",nadd)
 
 print("records",len(names),"dropped",drop,"moves",len(moves)//5,"vocab",len(VNL))
 _buf=io.StringIO()
-json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT},_buf,separators=(",",":"),ensure_ascii=False)
+json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT,"drl":DRL,"drs":DRS},_buf,separators=(",",":"),ensure_ascii=False)
 
 _js=_buf.getvalue()
 with open(OUT,"w") as f:
