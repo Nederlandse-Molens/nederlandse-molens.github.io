@@ -121,10 +121,10 @@ for f in json.load(open(D+"/gemalen.geojson"))["features"]:
     b=yr(p["stichtingsjaar"])
     kind=5 if p["aandrijving_oorspronkelijk"]=="Stoom" else 6
     st=PST.get(p["status"],9); fl=0
-    if not b: UNDATED.append((lon,lat,kind,64|(0 if st==6 else 1),p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),st,"")); continue
+    if not b: UNDATED.append((lon,lat,kind,64|(0 if st==6 else 1),p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),st,str(p.get("id") or ""))); continue
     if st==6: e0,e1=b+25,2000; fl|=8
     else: e0=e1=9999; fl|=1
-    add(lon,lat,b,b,e0,e1,kind,fl,p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),b,0,st,"")
+    add(lon,lat,b,b,e0,e1,kind,fl,p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),b,0,st,str(p.get("id") or ""))   # tb holds the gemalen.nl id for pumping stations
 
 # ---------- sites: records within ~25 m are one place with a history ----------
 import collections

@@ -53,7 +53,7 @@ function tipHTML(i){
     else if(st===4)when=`${tr('rebuiltIn')} ${by} · ${tr('still')}`;
     else when=`${bpart} · ${st===3?tr('remains'):tr('still')}`;}
   const tb=TBS[i];
-  const am=tb&&k<5?` · <a target="_blank" rel="noopener" href="https://zoeken.allemolens.nl/tenbruggencatenummer/${encodeURIComponent(tb.trim())}">allemolens.nl ↗</a>`:'';
+  const am=tb&&k<5?` · <a target="_blank" rel="noopener" href="https://zoeken.allemolens.nl/tenbruggencatenummer/${encodeURIComponent(tb.trim())}">allemolens.nl ↗</a>`:tb&&k>=5?` · <a target="_blank" rel="noopener" href="https://gemalen.nl/gemaal_detail.asp?gem_id=${encodeURIComponent(tb.trim())}">gemalen.nl ↗</a>`:'';
   const link=`<div class="l">${pinned?'':tr('pin')+' · '}<a target="_blank" rel="noopener" href="${osmPt(i)}">OpenStreetMap ↗</a>${am}</div>`;
   let hist='';const si=SITE[i];
   if(si>=0){const rows=SITES[si].map(j=>{const o2=j*5,b=ME[o2+2],e=ME[o2+3],s2=ME[o2+4],nm=cleanName(NAMES[j])||tr('unnamed');
