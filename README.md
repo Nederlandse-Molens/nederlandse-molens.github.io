@@ -71,7 +71,7 @@ The CC0 and public domain datasets need no credit, but the page credits RCE, De 
 
 ## Licence
 
-Copyright © 2026 professional-cynic.
+Copyright © 2026 [Toni Nestorowicz](https://nestorowicz.nl).
 
 The code and the project's own texts (including the curated floods and depolderings) are licensed under the European Union Public Licence, version 1.2 (EUPL-1.2). See `LICENSE`. Like the GPL it lets anyone use, change and share this work, also commercially, as long as changed versions stay under the same terms; unlike the GPL, that also applies when a changed version is only offered as an online service.
 
