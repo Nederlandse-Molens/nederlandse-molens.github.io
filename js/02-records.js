@@ -25,7 +25,7 @@ function pres(i,t){
   return a;
 }
 const isGhost=(i,t)=>KD[i]<5&&!(FL[i]&17)&&t>=E1[i]&&t>B1[i]&&t<NX[i];
-const fuzzy=(i,t)=>(FL[i]&64)||((FL[i]&4)&&t<B1[i])||((FL[i]&8)&&t>=E0[i]);
+const fuzzy=(i,t)=>((FL[i]&4)&&t<B1[i])||((FL[i]&8)&&t>=E0[i]);
 
 // ---------- filters ----------
 const kindOn=[1,1,1,1,1,1,1];let mode=0;const VIS=new Uint8Array(N);

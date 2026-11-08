@@ -13,7 +13,7 @@ function mkA(){return Array.from({length:7},()=>[null,[],[],[],[]]);}
 // part: 0 everything, 1 static items only (ghosts, stumps, rings, pumps, halos), 2 rotating windmills only
 // c: main context (scale sc), fc: low-res context for uncertain items (or null)
 function drawMills(c,sc,fc,V,list,z,now,bounds,part){
-  const A=[mk(),mk()],D=[mkA(),mkA()],ghosts=new Path2D(),stumps=[new Path2D(),new Path2D()],halos=[];
+  const A=[mk(),mk()],D=[mkA(),mkA()],und=new Path2D(),ghosts=new Path2D(),stumps=[new Path2D(),new Path2D()],halos=[];
   const r=Math.max(1.7,Math.min(16,2.7*z)),ring=z>2.2,gs=ring?Math.min(4.5,1+z*0.22):Math.max(1.1,1.1*z),detail=r>=5;
   const glow=Math.max(0,Math.min(1,(t-1900)/70)),hr=Math.max(5.5,Math.min(28,7*z)),rot=RM?0:now/1000*0.85;
   const [bx0,by0,bx1,by1]=bounds;let nF=0;const blurMode=fc==='blur';
@@ -27,6 +27,8 @@ function drawMills(c,sc,fc,V,list,z,now,bounds,part){
     if(x<bx0||y<by0||x>bx1||y>by1)continue;
     const k=KD[i],wind=(k<2||k===4)&&!(FL[i]&2);
     const lift=wind&&detail&&CT[i]<9?BASE[CT[i]]*r:0;
+    // no year at all: a dashed ring, so they don't read as 'date uncertain' (blurred)
+    if(part!==2&&(FL[i]&64)&&pres(i,t)>0.02){const ur=Math.max(4,r*1.15);und.moveTo(x+ur,y);und.arc(x,y,ur,0,6.2832);}
     if(part!==2&&lift){const a0=pres(i,t);if(a0>0.02)bodies.push(x,y-lift,i,a0,fuzzy(i,t)?1:0);}
     if(part===1&&wind){const a=pres(i,t);if(a<=0.02&&!(FL[i]&17)&&t>=E1[i]&&t>B1[i]&&t<NX[i])ghost(x,y);else if(a>0.02&&(FL[i]&1)&&glow>0&&!fuzzy(i,t))halos.push(x,y);continue;}
     if(part===2&&!wind)continue;
@@ -42,6 +44,7 @@ function drawMills(c,sc,fc,V,list,z,now,bounds,part){
     const ca=Math.cos(an),sa=Math.sin(an),p=A[L][k][q],dx=ca*r,dy=sa*r;
     p.moveTo(x-dx,y-dy);p.lineTo(x+dx,y+dy);p.moveTo(x+dy,y-dx);p.lineTo(x-dy,y+dx);
   }
+  if(part!==2){c.save();c.setLineDash([2,2.5]);c.strokeStyle='rgba(236,228,210,.6)';c.lineWidth=1;c.stroke(und);c.restore();}
   if(part!==2){if(ring){c.strokeStyle='rgba(150,162,178,.45)';c.lineWidth=1;c.stroke(ghosts);}else{c.fillStyle='rgba(125,138,155,.30)';c.fill(ghosts);}}
   if(bodies.length){const Rb=rBucket(r*sc);c.save();c.setTransform(1,0,0,1,0,0);
     for(let h=0;h<bodies.length;h+=5){const i=bodies[h+2],img=bodySprite(CT[i],KD[i],Rb);c.globalAlpha=bodies[h+3]*(bodies[h+4]?0.35:0.85);
