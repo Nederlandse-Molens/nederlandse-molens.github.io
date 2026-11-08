@@ -34,12 +34,11 @@ function getTile(z,x,y){
   const im=new Image(),pI=BM.p;e={im,ok:false,failed:0};
   const done=out=>{if(pI!==BM.p)return;e.im=out;e.ok=true;dirtyTiles=true;tileLoads++;if(BM.ok!==true){BM.ok=true;updBM();}};
   // a darkened tile that came out empty (image not decoded yet, or the browser dropped the canvas under memory pressure) is retried after a second, instead of staying a black square
-  const bad=()=>{if(pI!==BM.p)return;e.failed=performance.now()-RETRY_MS+1000;};
+  const bad=()=>{if(pI!==BM.p)return;e.failed=Math.max(1,performance.now()-RETRY_MS+1000);};
   im.onload=()=>{if(pI!==BM.p)return;if(!pv.dark){done(im);return;}
-    (im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>{if(pI!==BM.p)return;const c=darken(im);
-      if(!tileSane(im,c)){bad();return;}
-      // kept as an ImageBitmap: unlike a canvas it has no context the browser can take away
-      if(window.createImageBitmap)createImageBitmap(c).then(done,()=>done(c));else done(c);});};
+    const c=darken(im);if(!tileSane(im,c)){bad();return;}
+    // kept as an ImageBitmap: unlike a canvas it has no context the browser can take away
+    if(window.createImageBitmap)createImageBitmap(c).then(done,()=>done(c));else done(c);};
   im.onerror=()=>{if(pI!==BM.p)return;e.failed=performance.now();
     if(BM.ok!==true&&++BM.fails>=3){BM.fails=0;BM.p++;BM.cache.clear();if(BM.p>=PROV.length){BM.ok=false;if(view.s>fitS*40)animZoom(fitS*40/view.s);}updBM();}};
   im.crossOrigin='anonymous';im.src=pv.url(z,x,y);BM.cache.set(k,e);
