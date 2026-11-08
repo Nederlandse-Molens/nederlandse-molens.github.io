@@ -46,5 +46,5 @@ en:{title:"Dutch Mills Through the Ages",over:"The Netherlands · 1200–2026",s
  <p><b>Map.</b> When you zoom in, the BRT background map appears beneath the mills (Kadaster via PDOK, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), darkened and turned grey here. Click a mill for its exact location in OpenStreetMap.</p>
  <p>Each mill also links to more information on allemolens.nl. Typeface: Inter Tight (SIL Open Font License). Code and text: <a href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank" rel="noopener">EUPL 1.2</a>.</p>`}
 };
-let lang='nl';try{const s=localStorage.getItem('stilte-lang');if(s&&(s==='nl'||s==='en'))lang=s;else if(!/^nl/i.test(navigator.language||''))lang='en';}catch(e){if(!/^nl/i.test(navigator.language||''))lang='en';}
+let lang='nl';try{const s=localStorage.getItem('stilte-lang');if(s&&(s==='nl'||s==='en'))lang=s;else if(!/^(nl|fy)/i.test(navigator.language||''))lang='en';}catch(e){if(!/^(nl|fy)/i.test(navigator.language||''))lang='en';}
 const tr=k=>I18N[lang][k];
