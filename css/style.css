@@ -58,6 +58,8 @@ button{font:inherit;color:inherit}
 #attr{position:absolute;right:32px;bottom:192px;font-family:var(--sans);font-size:10px;color:var(--dim);opacity:0;transition:opacity .4s;pointer-events:none}#attr.on{opacity:1;pointer-events:auto}#attr a{color:var(--ink2)}
 #map.lensing{cursor:none}
 @media (max-width:900px){#ctl{right:14px;bottom:130px}}
+/* phones in portrait: the buttons go in a column along the right edge, above the timeline readout, instead of a row across the middle of the map */
+@media (max-width:900px) and (min-height:561px){#ctl{flex-direction:column;right:10px;bottom:178px;gap:8px}}
 /* timeline */
 #bar{position:absolute;left:36px;right:32px;bottom:22px;height:104px;display:flex;align-items:flex-end;gap:18px}
 #play{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(236,228,210,.28);background:rgba(10,14,22,.5);cursor:pointer;display:grid;place-items:center;margin-bottom:26px;transition:border-color .2s}
