@@ -55,7 +55,21 @@ def add(lon,lat,b0,b1,e0,e1,kind,fl,name,ti,fi,by,ey,st,tb):
     if re.fullmatch(r"\(.*\)",nm) or nm.lower() in("(naamloos)","naamloos"): nm=""
     names.append(nm); tbs.append(tb or "")
 # moves the source data doesn't mark: lost mill (Ten Bruggencate nr) → standing mill it became, and the year it was set up again there
-MOVED_TO={"00066":("12750",2013)}   # Meerburgermolen: taken down near Zoeterwoude-Rijndijk in 2007, re-erected in Leiderdorp in 2013 (molendatabase.nl)
+# (None: keep the build year the target already has). All checked against the history pages on molendatabase.nl, Nov 2026.
+MOVED_TO={
+ "00066":("12750",2013),          # Meerburgermolen: taken down near Zoeterwoude-Rijndijk in 2007, re-erected in Leiderdorp in 2013
+ "00852":("10690",1963),          # De Gekroonde Poelenburg: to the Zaanse Schans, 1963
+ "01777":("11754",1968),          # De Zoeker: to the Zaanse Schans, night of 2-3 August 1968
+ "04911":("04911 bis bis",1955),  # De Huisman: taken down 1955, rebuilt on warehouse De Haan at the Zaanse Schans
+ "06651":("10256",1965),          # De Windhond: to the Zaanse Schans, 1965
+ "00213":("17091",None),          # De Grauwe Beer: moved to a higher spot in Beesel
+ "01652":("10203",1989),          # De Hoed: Kruiningen to Waarde, 1 April 1989
+ "00949":("10166",None),          # Dekkermolen: to molenmakerij Van Beek, Rijnsaterwoude, c. 1975 ...
+ "10166":("12384",2009),          # ... and from there to Hoogmade, 2009
+ "01772":("12230",1977),          # De Eersteling: moved in one piece, Hoofddorp, 1977
+ "06414":("10225",1977),          # Aeolus: moved within Farmsum and largely rebuilt, 1977 (in use 1978)
+ "10677":("10678",2003),          # Molen Hoogland: moved to the Zwette, Goutum, 2003
+}
 REERECTED={v[0]:v[1] for v in MOVED_TO.values()}
 MV=re.compile(r"verplaats|1e plek|2e plek|3e plek|positie|voor de verplaatsing",re.I)
 LOST=json.load(open(D+"/verdwenen_molens.geojson"))["features"]
@@ -89,7 +103,7 @@ for f in LOST:
         fl|=16; st=1
         nm=re.sub(r"\s*(<i>)?\(?verplaatst\)?(</i>)?|\s*\((1e|2e|3e) plek\)|\s*\(voor de verplaatsing\)","",nm,flags=re.I)
         best=None
-        cand=[g for g in EXIST if tbn(g["properties"])==MOVED_TO[tbn(p)][0]] if tbn(p) in MOVED_TO else basegrp.get(tbn(p)[:5],[])
+        cand=[g for g in EXIST+LOST if tbn(g["properties"])==MOVED_TO[tbn(p)][0]] if tbn(p) in MOVED_TO else basegrp.get(tbn(p)[:5],[])
         for g in cand:
             if g is f: continue
             q=g["properties"]; d=kmd(f,g)
@@ -110,7 +124,7 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
     elif cat.startswith("water") or cat=="getijdemolen": kind=3
     st={"bestaand":2,"restant":3,"herbouwd":4}[p["STAAT"]]
     if st==3: fl|=2
-    if p["TBGCNUMMER"].strip() in REERECTED: b=REERECTED[p["TBGCNUMMER"].strip()]; st=4   # moved here: standing at this spot since then
+    if p["TBGCNUMMER"].strip() in REERECTED: b=REERECTED[p["TBGCNUMMER"].strip()] or b; st=4   # moved here: standing at this spot since then
     if not b: b0,b1=1600,1850; fl|=4
     else: b0=b1=b
     add(lon,lat,b0,b1,9999,9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),b,0,st,p["TBGCNUMMER"])
