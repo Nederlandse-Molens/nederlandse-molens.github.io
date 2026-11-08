@@ -2,7 +2,7 @@
 @font-face{font-family:"Inter Tight";src:url("../fonts/InterTight-latin.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 :root{
   --ink:#ece4d2;--ink2:#b9b2a3;--dim:#7d7a73;--faint:#4a4c50;--line:rgba(236,228,210,.12);
-  --polder:#6fc8d0;--corn:#f0dfb8;--weide:#c4d39a;--horse:#b59d7e;--water:#6b98d8;--steam:#e8964a;--pump:#8e9aa8;--stump:#c9bda6;
+  --polder:#6fc8d0;--corn:#f0dfb8;--weide:#9fd36b;--horse:#b59d7e;--water:#6b98d8;--steam:#e8964a;--pump:#8e9aa8;--stump:#c9bda6;
   --serif:"Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;
   --sans:"Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;
 }

@@ -9,7 +9,7 @@ const CTN=11;const CT=new Uint8Array(N);
    for(let q=0;q<pats.length;q++)if(pats[q].test(tt)){c=q;break;}if(k===4&&c>=9)c=8;CT[i]=c;}}
 const ctTot=new Array(CTN).fill(0);for(let i=0;i<N;i++)if(CT[i]<CTN)ctTot[CT[i]]++;
 const SPLACE=DATA.splace||[],SSIZE=DATA.ssize||[];
-const COL=['#6fc8d0','#f0dfb8','#b59d7e','#6b98d8','#c4d39a','#e8964a','#8e9aa8'];
+const COL=['#6fc8d0','#f0dfb8','#b59d7e','#6b98d8','#9fd36b','#e8964a','#8e9aa8'];
 const GLYPH=['✕','✕','○','○','✕','■','■'];
 const Y0=1200,Y1=2026;
 const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
