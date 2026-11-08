@@ -18,6 +18,12 @@ function darken(im){const c=document.createElement('canvas');c.width=im.naturalW
     h.filter='url(#wmask)';h.drawImage(im,0,0);h.filter='none';h.globalCompositeOperation='source-in';h.fillStyle='rgb(20,38,62)';h.fillRect(0,0,m.width,m.height);
     g.globalCompositeOperation='source-over';g.drawImage(m,0,0);}
   return c;}
+// spot check: where the source tile is opaque, the darkened one must be too (PDOK sends CORS headers, so pixels can be read)
+const SCK=document.createElement('canvas');SCK.width=SCK.height=1;const sck=SCK.getContext('2d',{willReadFrequently:true});
+function tileSane(im,c){try{const w=c.width,h=c.height;for(const [fx,fy] of [[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]]){
+    const x=Math.floor(w*fx),y=Math.floor(h*fy);sck.clearRect(0,0,1,1);sck.drawImage(im,x,y,1,1,0,0,1,1);const a0=sck.getImageData(0,0,1,1).data[3];
+    if(a0<200)continue;sck.clearRect(0,0,1,1);sck.drawImage(c,x,y,1,1,0,0,1,1);if(sck.getImageData(0,0,1,1).data[3]<200)return false;}
+  return true;}catch(err){return true;}}
 const WMASK=(()=>{try{if(!('filter' in CanvasRenderingContext2D.prototype))return false;
   const ns='http://www.w3.org/2000/svg',sv=document.createElementNS(ns,'svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.style.position='absolute';
   sv.innerHTML='<filter id="wmask" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -14 0 14 0 -0.15"/></filter>';
@@ -26,10 +32,17 @@ function getTile(z,x,y){
   const pv=PROV[BM.p];if(!pv||BM.ok===false)return null;const k=BM.p+'/'+z+'/'+x+'/'+y;let e=BM.cache.get(k);
   if(e){ if(e.failed&&performance.now()-e.failed>RETRY_MS){BM.cache.delete(k);e=null;} else {BM.cache.delete(k);BM.cache.set(k,e);return e;} } // LRU touch
   const im=new Image(),pI=BM.p;e={im,ok:false,failed:0};
-  im.onload=()=>{if(pI!==BM.p)return;e.im=pv.dark?darken(im):im;e.ok=true;dirtyTiles=true;tileLoads++;if(BM.ok!==true){BM.ok=true;updBM();}};
+  const done=out=>{if(pI!==BM.p)return;e.im=out;e.ok=true;dirtyTiles=true;tileLoads++;if(BM.ok!==true){BM.ok=true;updBM();}};
+  // a darkened tile that came out empty (image not decoded yet, or the browser dropped the canvas under memory pressure) is retried after a second, instead of staying a black square
+  const bad=()=>{if(pI!==BM.p)return;e.failed=performance.now()-RETRY_MS+1000;};
+  im.onload=()=>{if(pI!==BM.p)return;if(!pv.dark){done(im);return;}
+    (im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>{if(pI!==BM.p)return;const c=darken(im);
+      if(!tileSane(im,c)){bad();return;}
+      // kept as an ImageBitmap: unlike a canvas it has no context the browser can take away
+      if(window.createImageBitmap)createImageBitmap(c).then(done,()=>done(c));else done(c);});};
   im.onerror=()=>{if(pI!==BM.p)return;e.failed=performance.now();
     if(BM.ok!==true&&++BM.fails>=3){BM.fails=0;BM.p++;BM.cache.clear();if(BM.p>=PROV.length){BM.ok=false;if(view.s>fitS*40)animZoom(fitS*40/view.s);}updBM();}};
-  im.src=pv.url(z,x,y);BM.cache.set(k,e);
+  im.crossOrigin='anonymous';im.src=pv.url(z,x,y);BM.cache.set(k,e);
   while(BM.cache.size>TILE_MAX){BM.cache.delete(BM.cache.keys().next().value);}
   return e;}
 let dirtyTiles=false,tileLoads=0;const TL=document.createElement('canvas'),tlx=TL.getContext('2d');let tlKey='',tlCov=0;
