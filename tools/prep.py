@@ -54,6 +54,9 @@ def add(lon,lat,b0,b1,e0,e1,kind,fl,name,ti,fi,by,ey,st,tb):
     nm=re.sub(r"<[^>]+>|\bvoorganger\b","",name or "").strip(" /")
     if re.fullmatch(r"\(.*\)",nm) or nm.lower() in("(naamloos)","naamloos"): nm=""
     names.append(nm); tbs.append(tb or "")
+# moves the source data doesn't mark: lost mill (Ten Bruggencate nr) → standing mill it became, and the year it was set up again there
+MOVED_TO={"00066":("12750",2013)}   # Meerburgermolen: taken down near Zoeterwoude-Rijndijk in 2007, re-erected in Leiderdorp in 2013 (molendatabase.nl)
+REERECTED={v[0]:v[1] for v in MOVED_TO.values()}
 MV=re.compile(r"verplaats|1e plek|2e plek|3e plek|positie|voor de verplaatsing",re.I)
 LOST=json.load(open(D+"/verdwenen_molens.geojson"))["features"]
 EXIST=json.load(open(D+"/molens.geojson"))["features"]+json.load(open(D+"/weidemolens.geojson"))["features"]
@@ -82,11 +85,12 @@ for f in LOST:
     else: e0=e1=e
     e0=max(e0,b1+1); e1=max(e1,e0)
     nm=p["molen_naam"] or ""; st=0
-    if MV.search(re.sub(r"<[^>]+>","",nm)+" "+str(p["verdwenen2"] or "")) and e:
+    if (MV.search(re.sub(r"<[^>]+>","",nm)+" "+str(p["verdwenen2"] or "")) or tbn(p) in MOVED_TO) and e:
         fl|=16; st=1
         nm=re.sub(r"\s*(<i>)?\(?verplaatst\)?(</i>)?|\s*\((1e|2e|3e) plek\)|\s*\(voor de verplaatsing\)","",nm,flags=re.I)
         best=None
-        for g in basegrp.get(tbn(p)[:5],[]):
+        cand=[g for g in EXIST if tbn(g["properties"])==MOVED_TO[tbn(p)][0]] if tbn(p) in MOVED_TO else basegrp.get(tbn(p)[:5],[])
+        for g in cand:
             if g is f: continue
             q=g["properties"]; d=kmd(f,g)
             if d<0.05 or d>40: continue
@@ -106,6 +110,7 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
     elif cat.startswith("water") or cat=="getijdemolen": kind=3
     st={"bestaand":2,"restant":3,"herbouwd":4}[p["STAAT"]]
     if st==3: fl|=2
+    if p["TBGCNUMMER"].strip() in REERECTED: b=REERECTED[p["TBGCNUMMER"].strip()]; st=4   # moved here: standing at this spot since then
     if not b: b0,b1=1600,1850; fl|=4
     else: b0=b1=b
     add(lon,lat,b0,b1,9999,9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),b,0,st,p["TBGCNUMMER"])
