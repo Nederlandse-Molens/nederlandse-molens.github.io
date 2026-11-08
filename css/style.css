@@ -47,6 +47,8 @@ button{font:inherit;color:inherit}
 .chip.off{color:var(--faint)}.chip.off .g{opacity:.25}
 .keys{margin-top:22px;border-top:1px solid var(--line);padding-top:14px;line-height:2;color:var(--dim);font-size:11.5px}
 .keys span.g{display:inline-block;width:16px;text-align:center;margin-right:10px}
+/* tabular digits leave room either side of the glyph: pull the year left so its ink lines up with the text below */
+#year[data-d="1"]{margin-left:-.13em}#year[data-d="2"]{margin-left:-.065em}
 .i18n-wait [data-i]{visibility:hidden}
 #legal{margin-top:10px;font-size:10.5px;color:var(--dim)}#legal a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--faint)}#legal a:hover{color:var(--ink2)}
 #about-btn{margin-top:16px;background:none;border:0;padding:0;cursor:pointer;color:var(--ink2);font-family:var(--sans);font-size:11.5px;border-bottom:1px solid var(--faint)}
