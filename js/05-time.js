@@ -23,7 +23,7 @@ addEventListener('keydown',e=>{
     if(e.key==='n'||e.key==='N'||e.key==='Enter'){e.preventDefault();nextMill(e.key==='N'&&big?-1:1);return;}}
   if(!onCtl&&!onMap&&!onChart){if(e.key==='ArrowRight'){t=Math.min(Y1,t+5);return;}if(e.key==='ArrowLeft'){t=Math.max(Y0,t-5);return;}}
   if(e.key==='+'||e.key==='=')animZoom(2);else if(e.key==='-')animZoom(0.5);else if(e.key==='0'){fitView();userMoved=false;}
-  else if(e.key==='m'||e.key==='M')lensBtn.click();});
+  else if((e.key==='m'||e.key==='M')&&!e.repeat)lensBtn.click();});
 const rate=y=>(y>1540&&y<1680)||(y>1840&&y<1970)?0.55:(y<1450?1.6:1);
 
 // intro
