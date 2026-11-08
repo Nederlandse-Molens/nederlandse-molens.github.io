@@ -27,7 +27,7 @@ function drawChart(){
   if(bk!==cbKey){cbKey=bk;CB.width=chart.width;CB.height=chart.height;const c=cbx;c.setTransform(cdpr,0,0,cdpr,0,0);c.clearRect(0,0,w,h);
     c.fillStyle='rgba(236,228,210,.08)';c.fillRect(0,bot,w,1);
     c.font='400 10px "Inter Tight",sans-serif';c.fillStyle='#5d5e60';
-    for(let y=1200;y<=2000;y+=(w<560?200:100)){c.fillRect(Math.round(xs(y)),bot,1,4);c.textAlign=y===1200?'left':'center';c.fillText(y,Math.round(xs(y)),h-5);}
+    for(let y=1200;y<=2000;y+=(w<560?200:100)){c.fillRect(Math.round(xs(y)),bot,1,4);const lx=Math.round(xs(y));c.textAlign=y===1200?'left':lx+14>w?'right':'center';c.fillText(y,c.textAlign==='right'?w:lx,h-5);}
     const area=(arr,g,stroke)=>{c.beginPath();c.moveTo(0,bot);for(let y=0;y<NY;y++)c.lineTo(xs(Y0+y),ys(arr[y]));c.lineTo(w,bot);c.closePath();c.fillStyle=g;c.fill();
       c.beginPath();for(let y=0;y<NY;y++)c.lineTo(xs(Y0+y),ys(arr[y]));c.strokeStyle=stroke;c.lineWidth=1.1;c.stroke();};
     const gO=c.createLinearGradient(0,top,0,bot);gO.addColorStop(0,'rgba(240,223,184,.26)');gO.addColorStop(1,'rgba(240,223,184,.03)');area(cntM,gO,'rgba(240,223,184,.8)');
