@@ -106,7 +106,9 @@ function drawLakeGroup(c,V,k){
     if(w>0&&h>0){lgC=document.createElement('canvas');lgC.width=w;lgC.height=h;const g=lgC.getContext('2d'),im=g.createImageData(w,h),d=im.data,l=dmPix[k];
       for(let q=0;q<l.length;q++){const x=l[q]%W-bx[0],y=((l[q]/W)|0)-bx[1],o=(y*w+x)*4;d[o]=236;d[o+1]=228;d[o+2]=210;d[o+3]=70;}
       g.putImageData(im,0,0);}}
-  if(lgC&&lgK===k){const bx=dmBox[k];c.save();c.imageSmoothingEnabled=false;c.drawImage(lgC,V.x+bx[0]*V.s,V.y+bx[1]*V.s,lgC.width*V.s,lgC.height*V.s);c.restore();}
+  // the lake comes from a coarse raster (one pixel is about 120 m): fade it out once its pixels would show as blocks, the rings carry on
+  const fa=Math.min(1,Math.max(0,(6-V.s)/4));
+  if(lgC&&lgK===k&&fa>0.01){const bx=dmBox[k];c.save();c.globalAlpha=fa;c.imageSmoothingEnabled=true;c.drawImage(lgC,V.x+bx[0]*V.s,V.y+bx[1]*V.s,lgC.width*V.s,lgC.height*V.s);c.restore();}
   const mem=POLREC[k];if(!mem)return;c.save();c.lineWidth=1.1;
   for(const j of mem){if(!VIS[j])continue;const on=pres(j,t)>0.02,px=V.x+X[j]*V.s,py=V.y+Yc[j]*V.s;
     if(px<-10||py<-10||px>cw+10||py>ch+10)continue;

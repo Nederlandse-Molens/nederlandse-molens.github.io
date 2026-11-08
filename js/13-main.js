@@ -29,7 +29,7 @@ function frame(now){
   // where tiles are still missing, show the landscape at full strength instead of a dark hole
   if(want>0.01&&BM.miss&&BM.miss.length&&landReady>=4&&mainCov>0.05){ctx.setTransform(1,0,0,1,0,0);const m=BM.miss;
     for(let q=0;q<m.length;q+=4){const sx=Math.max(0,Math.round(m[q]*dpr)),sy=Math.max(0,Math.round(m[q+1]*dpr)),ex=Math.min(LC.width,Math.round((m[q]+m[q+2])*dpr)),ey=Math.min(LC.height,Math.round((m[q+1]+m[q+3])*dpr));
-      if(ex>sx&&ey>sy){ctx.globalAlpha=want;ctx.fillStyle='rgb(20,38,62)';ctx.fillRect(sx,sy,ex-sx,ey-sy);ctx.globalAlpha=1;ctx.drawImage(LC,sx,sy,ex-sx,ey-sy,sx,sy,ex-sx,ey-sy);}}
+      if(ex>sx&&ey>sy){ctx.globalAlpha=want;ctx.fillStyle=`rgb(${WATER})`;ctx.fillRect(sx,sy,ex-sx,ey-sy);ctx.globalAlpha=1;ctx.drawImage(LC,sx,sy,ex-sx,ey-sy,sx,sy,ex-sx,ey-sy);}}
     ctx.setTransform(dpr,0,0,dpr,0,0);}
   const attrOn=want*mainCov>0.05;if(lastTxt.attr!==attrOn){lastTxt.attr=attrOn;attrEl.classList.toggle('on',attrOn);}
   updOSMLink();
