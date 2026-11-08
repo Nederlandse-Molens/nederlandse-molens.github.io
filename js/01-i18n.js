@@ -48,3 +48,12 @@ en:{title:"Dutch Mills Through the Ages",over:"The Netherlands · 1200–2026",s
 };
 let lang='nl';try{const s=localStorage.getItem('stilte-lang');if(s&&(s==='nl'||s==='en'))lang=s;else if(!/^(nl|fy)/i.test(navigator.language||''))lang='en';}catch(e){if(!/^(nl|fy)/i.test(navigator.language||''))lang='en';}
 const tr=k=>I18N[lang][k];
+// static texts: applied right away, before the (large) data file has loaded, so the page never shows the wrong language
+function applyText(){
+  document.documentElement.lang=lang;
+  document.title=lang==='nl'?'Molens door de eeuwen heen: Nederland, 1200–2026':'Dutch Mills Through the Ages: the Netherlands, 1200–2026';
+  document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=tr(el.dataset.i);});
+  if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)document.querySelectorAll('[data-i="hint"]').forEach(el=>el.textContent=tr('hintTouch'));
+  document.documentElement.classList.remove('i18n-wait');
+}
+applyText();

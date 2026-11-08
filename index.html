@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* not Dutch? hide the Dutch placeholder texts until js/01-i18n.js has swapped them */(function(){var l;try{l=localStorage.getItem('stilte-lang')}catch(e){}if(l!=='nl'&&(l==='en'||!/^(nl|fy)/i.test(navigator.language||'')))document.documentElement.classList.add('i18n-wait');})();</script>
 <link rel="license" href="https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12">
 <title>Molens door de eeuwen heen: Nederland, 1200–2026</title>
 <link rel="preload" href="fonts/InterTight-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -71,8 +72,8 @@
 </div>
 <div id="about" class="veil"><div class="box"><button class="x" aria-label="close">×</button><div id="about-body"></div></div></div>
 
-<script src="data/data.js"></script>
 <script src="js/01-i18n.js"></script>
+<script src="data/data.js"></script>
 <script src="js/02-records.js"></script>
 <script src="js/03-landscape.js"></script>
 <script src="js/04-view.js"></script>

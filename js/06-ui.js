@@ -4,12 +4,9 @@ const chipsEl=document.getElementById('chips');
 const ORDER=[0,1,4,2,3,5,6];
 const NF={nl:new Intl.NumberFormat('nl-NL'),en:new Intl.NumberFormat('en-GB')};function fmt(n){return NF[lang==='nl'?'nl':'en'].format(Math.round(n));}
 function renderUI(){
-  document.documentElement.lang=lang;
-  document.title=lang==='nl'?'Molens door de eeuwen heen: Nederland, 1200–2026':'Dutch Mills Through the Ages: the Netherlands, 1200–2026';
-  document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=tr(el.dataset.i);});if(typeof lastTxt!=='undefined')lastTxt.pOne=null;
+  applyText();if(typeof lastTxt!=='undefined')lastTxt.pOne=null;
   document.querySelectorAll('#lang button').forEach(b=>{b.classList.toggle('on',b.dataset.l===lang);b.setAttribute('aria-pressed',b.dataset.l===lang);});
   document.querySelectorAll('#mode button').forEach(b=>{b.classList.toggle('on',+b.dataset.m===mode);b.setAttribute('aria-pressed',+b.dataset.m===mode);});
-  if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)document.querySelectorAll('[data-i="hint"]').forEach(el=>el.textContent=tr('hintTouch'));
   cv.setAttribute('aria-label',tr('aMap'));chart.setAttribute('aria-label',tr('aChart'));
   for(const [id,k] of [['zin','aZin'],['zout','aZout'],['zfit','aFit'],['bm-btn','aBm'],['lens-btn','aLens'],['speed','aSpeed'],['osm-area','aOsm']]){const el=document.getElementById(id);el.setAttribute('aria-label',tr(k));el.title=tr(k);}
   playBtn.setAttribute('aria-label',tr(playing?'aPause':'aPlay'));playBtn.title=tr(playing?'aPause':'aPlay');
