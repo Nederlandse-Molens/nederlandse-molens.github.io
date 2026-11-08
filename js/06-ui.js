@@ -24,6 +24,7 @@ function renderUI(){
   [0,1,2,3,4,5,6,7,8,9,10].forEach(c=>{const b=document.createElement('button');b.className='chip'+(ctOn[c]?'':' off');b.setAttribute('aria-pressed',!!ctOn[c]);
     b.innerHTML=`<span class="g" style="color:var(--corn)">${c<9?'✕':'·'}</span><span>${tr('CT')[c]}</span><span class="n">${fmt(ctTot[c])}</span>`;
     b.onclick=()=>{ctOn[c]=ctOn[c]?0:1;if(!ctOn.slice(0,11).some(v=>v))ctOn[c]=1;renderUI();applyFilter();};ctc.appendChild(b);});
+  const ub=document.getElementById('undated');ub.setAttribute('aria-pressed',!!undOn);document.getElementById('undN').textContent=fmt(undTot);document.getElementById('undated-note').classList.toggle('on',!!undOn);
   const pb=document.getElementById('polder');pb.setAttribute('aria-pressed',polderOn);document.getElementById('polder-note').classList.toggle('on',polderOn);
   const hl=document.getElementById('histlist');hl.innerHTML='';
   TOPSITES.forEach(si=>{const [b0,b1,up]=siteSpan(si),b=document.createElement('button');
@@ -34,6 +35,7 @@ function renderUI(){
 }
 document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;try{localStorage.setItem('stilte-lang',lang);}catch(e){}renderUI();});
 let savedKinds=null;
+document.getElementById('undated').onclick=()=>{undOn=undOn?0:1;renderUI();applyFilter();};
 document.getElementById('polder').onclick=()=>{polderOn=!polderOn;updateDM(true);if(!polderOn){hovEv=null;if(pinned&&pinI<0){pinned=false;tip.classList.remove('pin');tip.style.display='none';}}
   if(polderOn){savedKinds=kindOn.slice();[1,0,0,0,0,1,1].forEach((v,j)=>kindOn[j]=v);}else if(savedKinds){savedKinds.forEach((v,j)=>kindOn[j]=v||kindOn[j]);savedKinds=null;}
   lkey='';renderUI();applyFilter();};

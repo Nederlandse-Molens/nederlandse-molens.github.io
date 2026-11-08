@@ -128,6 +128,9 @@ button{font:inherit;color:inherit}
 .toggle[aria-pressed="true"] .sw2{background:var(--polder)}.toggle[aria-pressed="true"] .sw2::after{transform:translateX(12px);background:#0b0f17}
 #polder-note{display:none;font-size:11px;line-height:1.5;color:var(--polder);margin:0 0 14px}
 #polder-note.on{display:block}
+.toggle.t2{background:none;border-color:var(--line);margin:8px 0 6px;font-size:12px;padding:7px 10px}.toggle.t2 .n{margin-left:auto;color:var(--dim);font-variant-numeric:tabular-nums;font-size:11px}
+.toggle.t2[aria-pressed="true"]{border-color:rgba(236,228,210,.35)}.toggle.t2[aria-pressed="true"] .sw2{background:var(--ink2)}
+#undated-note{display:none;font-size:11px;line-height:1.5;color:var(--ink2);margin:0 0 10px}#undated-note.on{display:block}
 details{margin-top:14px}details summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
 details summary::-webkit-details-marker{display:none}details summary::after{content:"+";font-size:13px;color:var(--dim);letter-spacing:0}details[open] summary::after{content:"−"}
 #histlist{margin-top:8px;display:flex;flex-direction:column;gap:1px}

@@ -63,16 +63,17 @@ for g in LOST+EXIST: basegrp.setdefault(tbn(g["properties"])[:5],[]).append(g)
 def kmd(a,b):
     (x1,y1),(x2,y2)=a["geometry"]["coordinates"][:2],b["geometry"]["coordinates"][:2]
     return math.hypot((x1-x2)*68,(y1-y2)*111)
-moves=[];drop=0
+moves=[];drop=0;UNDATED=[]
 for f in LOST:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
     b=yr(p["bouwjaar_1"]); e=yr(p["verdwenen1"]); fl=0
-    if not b and not e: drop+=1; continue
     if e and b and e<b: b,e=e,b
     dr=(p["aandrijvin"] or "").lower()
     kind=2 if dr.startswith(("ros","tred","hond")) else 3 if dr.startswith("water") else 0 if p["hoofdcat"]=="poldermolen" else 1
     if p["type"] in("weidemolen","tjasker","paaltjasker","boktjasker"): kind=4 if p["type"]=="weidemolen" else kind
     if dr=="wind- en watermolen": fl|=32   # driven by wind and water (watervluchtmolen): drawn as a windmill
+    if not b and not e:   # no dates at all: kept apart, shown only with "show undated", outside the timeline
+        drop+=1; UNDATED.append((lon,lat,kind,fl|64,p["molen_naam"] or "",vi(p["type"]),vi(p["functie"]),0,p["ten_brugge"])); continue
     if b==1832: b0,b1=1750,1832; fl|=4
     elif not b: b0,b1=e-150,e-30; fl|=4
     else: b0=b1=b
@@ -118,9 +119,9 @@ for f in json.load(open(D+"/weidemolens.geojson"))["features"]:
 for f in json.load(open(D+"/gemalen.geojson"))["features"]:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
     b=yr(p["stichtingsjaar"])
-    if not b: continue
     kind=5 if p["aandrijving_oorspronkelijk"]=="Stoom" else 6
     st=PST.get(p["status"],9); fl=0
+    if not b: UNDATED.append((lon,lat,kind,64|(0 if st==6 else 1),p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),st,"")); continue
     if st==6: e0,e1=b+25,2000; fl|=8
     else: e0=e1=9999; fl|=1
     add(lon,lat,b,b,e0,e1,kind,fl,p["naam_gemaal"],vi(p["aandrijving_oorspronkelijk"]),vi(p["functie"]),b,0,st,"")
@@ -215,6 +216,11 @@ def place_of(lon,lat):
     return best[1] if best[0]<=5 else ""
 SPLACE=[place_of(*LL[g[0]]) for g in sites]
 print("sites with a place name",sum(1 for x in SPLACE if x),"of",len(sites))
+# ---------- undated records: appended after the sites, so they never join a site's history ----------
+for lon,lat,kind,fl,nm,ti,fi,st,tb in UNDATED:
+    n0=len(names); add(lon,lat,0,0,9999,9999,kind,fl,nm,ti,fi,0,0,st,tb)
+    if len(names)>n0: SITE.append(-1); NEXT.append(9999)
+print("undated",len(UNDATED),"(lost mills",sum(1 for u in UNDATED if u[2]<5),", pumping stations",sum(1 for u in UNDATED if u[2]>=5),")")
 
 
 
