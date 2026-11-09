@@ -69,6 +69,7 @@ MOVED_TO={
  "01772":("12230",1977),          # De Eersteling: moved in one piece, Hoofddorp, 1977
  "06414":("10225",1977),          # Aeolus: moved within Farmsum and largely rebuilt, 1977 (in use 1978)
  "10677":("10678",2003),          # Molen Hoogland: moved to the Zwette, Goutum, 2003
+ "00067":("12220",2009),          # De Kalkmolen: taken down in Leiderdorp 9 February 2006, re-erected in Hoogmade end 2009
 }
 REERECTED={v[0]:v[1] for v in MOVED_TO.values()}
 MV=re.compile(r"verplaats|1e plek|2e plek|3e plek|positie|voor de verplaatsing",re.I)
