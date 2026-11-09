@@ -2,7 +2,7 @@
 // ---------- counts (precomputed once per kind × standing) ----------
 const NY=Y1-Y0+1,cntM=new Float32Array(NY),cntPol=new Float32Array(NY),cntP=new Float32Array(NY),cntW=new Float32Array(NY),cntO=new Float32Array(NY);let cmax=1,chartVer=0;
 const TBL=Array.from({length:14*12},()=>new Float32Array(NY));
-for(let i=0;i<N;i++){if(FL[i]&66)continue;const tb=TBL[(KD[i]*2+(FL[i]&1))*12+CT[i]];const y0=Math.max(Y0,B0[i]),y1=Math.min(Y1,E1[i]);
+for(let i=0;i<N;i++){if(FL[i]&66)continue;const tb=TBL[(KD[i]*2+STANDS[i])*12+CT[i]];const y0=Math.max(Y0,B0[i]),y1=Math.min(Y1,E1[i]);
   for(let y=y0;y<=y1;y++){const a=pres(i,y);if(a)tb[y-Y0]+=a;}}
 function computeCounts(){
   for(const a of [cntM,cntPol,cntP,cntW,cntO])a.fill(0);

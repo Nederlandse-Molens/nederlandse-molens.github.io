@@ -76,7 +76,7 @@ def drive(q):   # wind, water or muscle, for both the lost-mill and the standing
     d=(q.get("aandrijvin") or q.get("CATEGORIE") or "").lower()
     return "water" if d.startswith(("water","getij")) and "wind" not in d else "muscle" if d.startswith(("ros","tred","hond","koe")) else "wind"
 # a moved mill is the same mill: at its new site it keeps its original build year, and only stands there from the move
-ORIG_BY={};MVLINK=[]   # target tb → build year of the mill it came from; (lost tb, target tb) for every move found
+ORIG_BY={};MVLINK=[];EXPLACE={}   # target tb → build year of the mill it came from; (lost tb, target tb) for every move found
 MV=re.compile(r"verplaats|1e plek|2e plek|3e plek|positie|voor de verplaatsing",re.I)
 LOST=json.load(open(D+"/verdwenen_molens.geojson"))["features"]
 EXIST=json.load(open(D+"/molens.geojson"))["features"]+json.load(open(D+"/weidemolens.geojson"))["features"]
@@ -132,6 +132,7 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
     elif cat.startswith("water") or cat=="getijdemolen": kind=3
     st={"bestaand":2,"restant":3,"herbouwd":4}[p["STAAT"]]
     if st==3: fl|=2
+    EXPLACE[p["TBGCNUMMER"].strip()]=re.sub(r"\s*\(.*?\)","",p["PLAATS"] or "").strip()   # "Hoogmade (vh Leiderdorp)" → "Hoogmade"
     by=b; rr=REERECTED.get(p["TBGCNUMMER"].strip())
     if rr:
         b=rr[0] or b
@@ -324,19 +325,21 @@ print("drainage links",len(DRL)//3,"of which mills only on old maps (added, unda
 tbi={}
 for i,t in enumerate(tbs):
     if t and recs[i*8+6]<5: tbi.setdefault(t.strip(),i)
-MVL=[]
+MVL=[];MVP=[]   # aligned with moves: from and to record (-1 if not found), and the place the mill went to
 for a,b2 in MVLINK:
-    if a.strip() in tbi and b2 in tbi: MVL+=[tbi[a.strip()],tbi[b2]]
+    MVL+=[tbi.get(a.strip(),-1),tbi.get(b2,-1)]; MVP.append(EXPLACE.get(b2,""))
 # the same mill must not stand in two places: at its new site it appears from the move, not from its original build year
 late=0
 for q in range(0,len(MVL),2):
-    i,j=MVL[q],MVL[q+1]; e=meta[i*5+3]
+    i,j=MVL[q],MVL[q+1]
+    if i<0 or j<0: continue
+    e=meta[i*5+3]
     if e and recs[j*8+2]<e and not recs[j*8+7]&64:
         recs[j*8+2]=recs[j*8+3]=e; recs[j*8+7]&=~4; late+=1
 print("move links",len(MVL)//2,"new sites moved forward to the move year",late)
 print("records",len(names),"dropped",drop,"moves",len(moves)//5,"vocab",len(VNL))
 _buf=io.StringIO()
-json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"mvl":MVL,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT,"drl":DRL,"drs":DRS},_buf,separators=(",",":"),ensure_ascii=False)
+json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"mvl":MVL,"mvp":MVP,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT,"drl":DRL,"drs":DRS},_buf,separators=(",",":"),ensure_ascii=False)
 
 _js=_buf.getvalue()
 with open(OUT,"w") as f:

@@ -22,6 +22,7 @@ function renderUI(){
     b.innerHTML=`<span class="g" style="color:var(--corn)">${c<9?'✕':'·'}</span><span>${tr('CT')[c]}</span><span class="n">${fmt(ctTot[c])}</span>`;
     b.onclick=()=>{ctOn[c]=ctOn[c]?0:1;if(!ctOn.slice(0,11).some(v=>v))ctOn[c]=1;renderUI();applyFilter();};ctc.appendChild(b);});
   const ub=document.getElementById('undated');ub.setAttribute('aria-pressed',!!undOn);document.getElementById('undN').textContent=fmt(undTot);document.getElementById('undated-note').classList.toggle('on',!!undOn);
+  {const mn=document.getElementById('mode-note');mn.textContent=mode===1?tr('modeStand'):mode===2?tr('modeLost'):'';mn.classList.toggle('on',mode>0);document.getElementById('k-repl').classList.toggle('on',mode===2);}
   const pb=document.getElementById('polder');pb.setAttribute('aria-pressed',polderOn);document.getElementById('polder-note').classList.toggle('on',polderOn);
   const hl=document.getElementById('histlist');hl.innerHTML='';
   TOPSITES.forEach(si=>{const [b0,b1,up]=siteSpan(si),b=document.createElement('button');
@@ -60,3 +61,14 @@ document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{mode=+b.data
 
 const noteEl=document.getElementById('note');let curNote=null,noteTimer=0;
 function setNote(y){const n=tr('notes').find(n=>y>=n[0]&&y<n[1]);const s=n?n[2]:'';if(s!==curNote){curNote=s;noteEl.style.opacity=0;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{noteEl.textContent=s;noteEl.style.opacity=1;},450);}}
+
+// fly to one mill and pin it (the "moved to …" link in a tooltip)
+function flyToMill(j){const fid=++flightId;if(siteRun)setPlaying(false);
+  if(!VIS[j]){if(polderOn)document.getElementById('polder').click();mode=0;kindOn[KD[j]]=1;ctOn[CT[j]]=1;renderUI();applyFilter();}
+  if(t<B0[j]){setPlaying(false);t=B0[j];}   // it only stands at its new site from the move
+  tip.style.display='none';pinned=false;pinI=-1;tip.classList.remove('pin');
+  const target=Math.max(view.s,fitS*(BM.ok!==true||!BM.on?30:60)),s0=view.s,x0=(cw/2-view.x)/view.s,y0=(ch/2-view.y)/view.s,T0=performance.now(),dur=RM?0:900;
+  (function step(){if(fid!==flightId)return;const u=dur?Math.min(1,(performance.now()-T0)/dur):1,e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    const s=s0*Math.pow(target/s0,e),bx=x0+(X[j]-x0)*e,by=y0+(Yc[j]-y0)*e;view.s=s;view.x=cw/2-bx*s;view.y=ch/2-by*s;viewVer++;userMoved=true;touchInput();
+    if(u<1)requestAnimationFrame(step);else{pinned=true;pinI=j;tip.innerHTML=tipHTML(j);tip.classList.add('pin');tip.style.display='block';placeTip(view.x+X[j]*view.s,view.y+Yc[j]*view.s);}})();}
+tip.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;e.preventDefault();e.stopPropagation();flyToMill(+a.dataset.go);});

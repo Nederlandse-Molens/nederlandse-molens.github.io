@@ -49,6 +49,8 @@ button{font:inherit;color:inherit}
 .keys span.g{display:inline-block;width:16px;text-align:center;margin-right:10px}
 /* tabular digits leave room either side of the glyph: pull the year left so its ink lines up with the text below */
 #year[data-d="1"]{margin-left:-.13em}#year[data-d="2"]{margin-left:-.065em}
+#mode-note{display:none;font-size:11px;line-height:1.5;color:var(--ink2);margin:10px 0 14px}#mode-note.on{display:block}#k-repl{display:none}#k-repl.on{display:block}
+.g.gm{color:var(--corn);position:relative}.g.gm::before{content:"";position:absolute;left:-1px;top:50%;width:6px;height:6px;margin-top:-4px;border:1.2px solid var(--corn);border-radius:50%}
 .g.gu{color:var(--ink2);outline:1px dashed rgba(236,228,210,.6);outline-offset:1px;border-radius:50%}
 .i18n-wait [data-i]{visibility:hidden}
 #legal{margin-top:10px;font-size:10.5px;color:var(--dim)}#legal a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--faint)}#legal a:hover{color:var(--ink2)}

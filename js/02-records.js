@@ -17,7 +17,11 @@ const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').ma
 const DRL=DATA.drl||[],DRS=DATA.drs||[],RPOL=new Int16Array(N),RSRC=new Int16Array(N).fill(-1),POLREC={};
 for(let q=0;q<DRL.length;q+=3){const i=DRL[q],k=DRL[q+1];RPOL[i]=k;RSRC[i]=DRL[q+2];(POLREC[k]=POLREC[k]||[]).push(i);}
 // moves as record pairs: new site → the record it came from (for "moved here in …")
-const MVL=DATA.mvl||[],MVFROM=new Map();for(let q=0;q<MVL.length;q+=2)MVFROM.set(MVL[q+1],MVL[q]);
+// moves, aligned with DATA.mv: from and to record (-1: not found) and the place the mill went to
+const MVL=DATA.mvl||[],MVP=DATA.mvp||[],MVFROM=new Map(),MVTO=new Map();
+for(let q=0;q<MVL.length;q+=2){const a=MVL[q],b=MVL[q+1];if(a>=0&&b>=0){MVFROM.set(b,a);MVTO.set(a,q/2);}}
+// does this mill still stand, here or (after one or more moves) elsewhere? The Standing/Lost filters ask about the mill, not the spot
+const STANDS=new Uint8Array(N);for(let i=0;i<N;i++){let j=i,n=0;while(MVTO.has(j)&&n++<5)j=MVL[MVTO.get(j)*2+1];STANDS[i]=FL[j]&1;}
 let undOn=0;   // undated records (FL 64): outside the timeline, shown at every year when switched on
 function pres(i,t){
   if(FL[i]&64)return undOn;
@@ -26,11 +30,12 @@ function pres(i,t){
   if(t>=E0[i]){a=E1[i]>E0[i]?a*Math.max(0,1-(t-E0[i])/(E1[i]-E0[i])):0;}
   return a;
 }
+const movedSite=(i,t)=>MVTO.has(i)&&t>=ME[i*5+3];   // the empty spot a moved mill left (open ring)
 const isGhost=(i,t)=>KD[i]<5&&!(FL[i]&17)&&t>=E1[i]&&t>B1[i]&&t<NX[i];
 const fuzzy=(i,t)=>((FL[i]&4)&&t<B1[i])||((FL[i]&8)&&t>=E0[i]);
 
 // ---------- filters ----------
 const kindOn=[1,1,1,1,1,1,1];let mode=0;const VIS=new Uint8Array(N);
 const ctOn=new Array(12).fill(1);
-function applyFilter(){for(let i=0;i<N;i++){const st=FL[i]&1;VIS[i]=kindOn[KD[i]]&&ctOn[CT[i]]&&(mode===0||(mode===1&&st)||(mode===2&&!st))?1:0;}computeCounts();dirty=true;}
+function applyFilter(){for(let i=0;i<N;i++){const st=STANDS[i];VIS[i]=kindOn[KD[i]]&&ctOn[CT[i]]&&(mode===0||(mode===1&&st)||(mode===2&&!st))?1:0;}computeCounts();dirty=true;}
 const kindTot=[0,0,0,0,0,0,0];let undTot=0;for(let i=0;i<N;i++){if(FL[i]&64)undTot++;else kindTot[KD[i]]++;}

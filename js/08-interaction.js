@@ -31,7 +31,7 @@ function nearest(mx,my){
   let best=-1,bd=Infinity;
   for(let gy=Math.floor((by-reach)/G);gy<=Math.floor((by+reach)/G);gy++)for(let gx=Math.floor((bx-reach)/G);gx<=Math.floor((bx+reach)/G);gx++){
     if(gx<0||gy<0||gx>=GW||gy>=GH)continue;
-    for(const i of grid[gy*GW+gx]){if(!VIS[i])continue;if(pres(i,t)<0.15&&!isGhost(i,t))continue;
+    for(const i of grid[gy*GW+gx]){if(!VIS[i])continue;if(pres(i,t)<0.15&&!isGhost(i,t)&&!movedSite(i,t))continue;
       const k=KD[i],wind=(k<2||k===4)&&!(FL[i]&2),lb=wind&&detail&&CT[i]<9&&pres(i,t)>=0.15?BASE[CT[i]]*r/S:0;
       // distance to the segment from foot to hub
       const dy=Math.max(Yc[i]-lb,Math.min(Yc[i],by)),d=(X[i]-bx)**2+(dy-by)**2,lim=lb?sail:rad;
@@ -49,7 +49,8 @@ function tipHTML(i){
     const bpart=by===1832&&st<2?tr('already'):by?`${tr('built')} ${by}`:tr('byu');
     if(st===10)when=`${bpart} · ${tr('replaced').replace('{y}',ey)}`;
     else if(st===0)when=`${bpart} · ${ey?tr('gone')+' '+ey:tr('goneu')}`;
-    else if(st===1)when=`${bpart} · ${tr('moved')} ${ey}`;
+    else if(st===1){const q=MVTO.get(i),to=q!==undefined?MVL[q*2+1]:-1,pl=q!==undefined?MVP[q]:'';
+      when=to>=0&&pl?`${bpart} · ${tr('movedTo').replace('{y}',ey).replace('{p}',`<a href="#" data-go="${to}">${esc(pl)}</a>`)}`:`${bpart} · ${tr('moved')} ${ey}`;}
     else if(st===4)when=`${tr('rebuiltIn')} ${by} · ${tr('still')}`;
     else{const fr=MVFROM.get(i),mv=st===11?B0[i]:fr!==undefined?ME[fr*5+3]:0;   // moved here: the year it was set up again (or left its old site)
       when=`${bpart}${mv?' · '+tr('movedHere').replace('{y}',mv):''} · ${st===3?tr('remains'):tr('still')}`;}}
@@ -72,7 +73,7 @@ function tipHTML(i){
     const cnt=[nm2?nm2+' '+tr(nm2===1?'drMill1':'drMills'):'',np?np+' '+tr(np===1?'pumps1':'pumps'):''].filter(Boolean).join(', ');
     const src=DRS[RSRC[i]]||'';
     dr=`<div class="dr"><b>${tr('drLake')} ${esc(d[0])}</b> (${d[2]?tr('drBefore'):d[1]}) · ${cnt}${src?`<br><span>${tr('drSrc')} ${esc(src.replace(/ - /g,', '))}</span>`:''}</div>`;}
-  return `<div class="t">${esc(name)}</div><div class="k">${kind}</div><div class="w">${esc(when)}</div>${dr}${hist}${link}`;
+  return `<div class="t">${esc(name)}</div><div class="k">${kind}</div><div class="w">${when}</div>${dr}${hist}${link}`;
 }
 function placeTip(x,y){if(lens.on){x+=LR*0.72;y-=LR*0.72;}const floor=ch-(cw<900?150:180),tx=Math.min(x+16,cw-tip.offsetWidth-10),ty=Math.min(y+16,floor-tip.offsetHeight);tip.style.left=Math.max(8,tx)+'px';tip.style.top=Math.max(8,ty)+'px';}
 function hover(e){

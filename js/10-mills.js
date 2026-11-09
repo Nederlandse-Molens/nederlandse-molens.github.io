@@ -29,17 +29,19 @@ function drawMills(c,sc,fc,V,list,z,now,bounds,part){
     const lift=wind&&detail&&CT[i]<9?BASE[CT[i]]*r:0;
     // no year at all: a dashed ring, so they don't read as 'date uncertain' (blurred)
     if(part!==2&&(FL[i]&64)&&pres(i,t)>0.02){const ur=Math.max(4,r*1.15);und.moveTo(x+ur,y);und.arc(x,y,ur,0,6.2832);}
-    if(part!==2&&lift){const a0=pres(i,t);if(a0>0.02)bodies.push(x,y-lift,i,a0,fuzzy(i,t)?1:0);}
+    // Lost view: a mill later replaced on the same spot is drawn faint and still, so the places that lost their mill for good stand out
+    const mute=mode===2&&ME[i*5+4]===10?0.4:1;
+    if(part!==2&&lift){const a0=pres(i,t)*mute;if(a0>0.02)bodies.push(x,y-lift,i,a0,fuzzy(i,t)?1:0);}
     if(part===1&&wind){const a=pres(i,t);if(a<=0.02&&!(FL[i]&17)&&t>=E1[i]&&t>B1[i]&&t<NX[i])ghost(x,y);else if(a>0.02&&(FL[i]&1)&&glow>0&&!fuzzy(i,t))halos.push(x,y);continue;}
     if(part===2&&!wind)continue;
     const a=pres(i,t);
     if(a<=0.02){if(part!==2&&k<5&&!(FL[i]&17)&&t>=E1[i]&&t>B1[i]&&t<NX[i])ghost(x,y);continue;}
-    const L=fuzzy(i,t)?1:0,q=Math.max(1,Math.round(a*4));nF+=L;
+    const L=fuzzy(i,t)?1:0,q=Math.max(1,Math.round(a*4*mute));nF+=L;
     if(part!==2&&(FL[i]&1)&&glow>0&&k<5&&!L)halos.push(x,y);
     if(k>=5){const s=(k===5?2.6:2.1)*Math.min(3,z);A[L][k][q].rect(x-s/2,y-s/2,s,s);continue;}
     if(FL[i]&2){const s=Math.max(2.2,r*0.45);stumps[L].moveTo(x+s/2,y);stumps[L].arc(x,y,s/2,0,6.2832);continue;}
     if(k===2||k===3){const rr=r*0.62;A[L][k][q].moveTo(x+rr,y);A[L][k][q].arc(x,y,rr,0,6.2832);continue;}
-    const an=rot*SP[i]*(k===4?2.4:1)+PH[i];
+    const an=(mute<1?0:rot*SP[i]*(k===4?2.4:1))+PH[i];
     if(detail){D[L][k][q].push(x,y-lift,an);continue;}
     const ca=Math.cos(an),sa=Math.sin(an),p=A[L][k][q],dx=ca*r,dy=sa*r;
     p.moveTo(x-dx,y-dy);p.lineTo(x+dx,y+dy);p.moveTo(x+dy,y-dx);p.lineTo(x-dy,y+dx);
@@ -71,13 +73,15 @@ function drawMills(c,sc,fc,V,list,z,now,bounds,part){
   return nF;
 }
 function drawMoves(c,V,b){
-  if(mode===1||!kindOn.slice(0,5).some(v=>v))return;
-  for(let m=0;m<MV.length;m+=5){const yv=MV[m+4];if(t<yv)continue;const age=t-yv;
+  if(!kindOn.slice(0,5).some(v=>v))return;
+  for(let m=0;m<MV.length;m+=5){const yv=MV[m+4];if(t<yv)continue;const age=t-yv,fr=MVL[m/5*2];
+    if(fr>=0?!VIS[fr]:mode===1)continue;   // follows the filters of the mill that moved
     const x1=V.x+MV[m]*V.s,y1=V.y+MV[m+1]*V.s,x2=V.x+MV[m+2]*V.s,y2=V.y+MV[m+3]*V.s;
     if(Math.max(x1,x2)<b[0]||Math.min(x1,x2)>b[2]||Math.max(y1,y2)<b[1]||Math.min(y1,y2)>b[3])continue;
     const qx=(x1+x2)/2-(y2-y1)*0.3,qy=(y1+y2)/2+(x2-x1)*0.3;
     const al=age<14?0.9-age/14*0.62:0.28;c.strokeStyle=`rgba(240,223,184,${al})`;c.lineWidth=1;c.setLineDash([1.5,3]);
     c.beginPath();c.moveTo(x1,y1);c.quadraticCurveTo(qx,qy,x2,y2);c.stroke();c.setLineDash([]);
+    c.strokeStyle='rgba(240,223,184,.75)';c.lineWidth=1.2;c.beginPath();c.arc(x1,y1,3.5,0,6.2832);c.stroke();   // the empty spot it left
     if(age<14){const f=Math.min(1,age/3.5),px=(1-f)*(1-f)*x1+2*(1-f)*f*qx+f*f*x2,py=(1-f)*(1-f)*y1+2*(1-f)*f*qy+f*f*y2;
       c.globalCompositeOperation='lighter';c.globalAlpha=1-age/14;c.drawImage(SPR,px-9,py-9,18,18);c.globalAlpha=1;c.globalCompositeOperation='source-over';}
   }
