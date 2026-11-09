@@ -67,11 +67,16 @@ MOVED_TO={
  "00949":("10166",None),          # Dekkermolen: to molenmakerij Van Beek, Rijnsaterwoude, c. 1975 ...
  "10166":("12384",2009),          # ... and from there to Hoogmade, 2009
  "01772":("12230",1977),          # De Eersteling: moved in one piece, Hoofddorp, 1977
- "06414":("10225",1977),          # Aeolus: moved within Farmsum and largely rebuilt, 1977 (in use 1978)
+ "06414":("10225",1977,"rebuilt"),# Aeolus: moved within Farmsum but largely built anew, 1977 (in use 1978): counts as rebuilt
  "10677":("10678",2003),          # Molen Hoogland: moved to the Zwette, Goutum, 2003
  "00067":("12220",2009),          # De Kalkmolen: taken down in Leiderdorp 9 February 2006, re-erected in Hoogmade end 2009
 }
-REERECTED={v[0]:v[1] for v in MOVED_TO.values()}
+REERECTED={v[0]:v[1:] for v in MOVED_TO.values()}
+def drive(q):   # wind, water or muscle, for both the lost-mill and the standing-mill files
+    d=(q.get("aandrijvin") or q.get("CATEGORIE") or "").lower()
+    return "water" if d.startswith(("water","getij")) and "wind" not in d else "muscle" if d.startswith(("ros","tred","hond","koe")) else "wind"
+# a moved mill is the same mill: at its new site it keeps its original build year, and only stands there from the move
+ORIG_BY={};MVLINK=[]   # target tb → build year of the mill it came from; (lost tb, target tb) for every move found
 MV=re.compile(r"verplaats|1e plek|2e plek|3e plek|positie|voor de verplaatsing",re.I)
 LOST=json.load(open(D+"/verdwenen_molens.geojson"))["features"]
 EXIST=json.load(open(D+"/molens.geojson"))["features"]+json.load(open(D+"/weidemolens.geojson"))["features"]
@@ -102,18 +107,20 @@ for f in LOST:
     nm=p["molen_naam"] or ""; st=0
     if (MV.search(re.sub(r"<[^>]+>","",nm)+" "+str(p["verdwenen2"] or "")) or tbn(p) in MOVED_TO) and e:
         fl|=16; st=1
+        if tbn(p) in MOVED_TO: ORIG_BY[MOVED_TO[tbn(p)][0]]=(b,tbn(p))
         nm=re.sub(r"\s*(<i>)?\(?verplaatst\)?(</i>)?|\s*\((1e|2e|3e) plek\)|\s*\(voor de verplaatsing\)","",nm,flags=re.I)
         best=None
         cand=[g for g in EXIST+LOST if tbn(g["properties"])==MOVED_TO[tbn(p)][0]] if tbn(p) in MOVED_TO else basegrp.get(tbn(p)[:5],[])
         for g in cand:
             if g is f: continue
             q=g["properties"]; d=kmd(f,g)
+            if tbn(p) not in MOVED_TO and (tbn(q) in REERECTED or drive(q)!=drive(p)): continue   # a hand-checked move wins; wind stays wind, water stays water
             if d<0.05 or d>40: continue
             if "bouwjaar_1" in q and not (e-3<=yr(q["bouwjaar_1"])<=e+5): continue
             if best is None or d<best[0]: best=(d,g)
         if best:
             x2,y2=P(*best[1]["geometry"]["coordinates"][:2]); x1,y1=P(lon,lat)
-            moves+=[round(x1,1),round(y1,1),round(x2,1),round(y2,1),e]
+            moves+=[round(x1,1),round(y1,1),round(x2,1),round(y2,1),e]; MVLINK.append((p["ten_brugge"],tbn(best[1]["properties"])))
     add(lon,lat,b0,b1,e0,e1,kind,fl,nm,vi(p["type"]),vi(p["functie"]),b,e,st,p["ten_brugge"])
 for f in json.load(open(D+"/molens.geojson"))["features"]:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
@@ -125,10 +132,17 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
     elif cat.startswith("water") or cat=="getijdemolen": kind=3
     st={"bestaand":2,"restant":3,"herbouwd":4}[p["STAAT"]]
     if st==3: fl|=2
-    if p["TBGCNUMMER"].strip() in REERECTED: b=REERECTED[p["TBGCNUMMER"].strip()] or b; st=4   # moved here: standing at this spot since then
+    by=b; rr=REERECTED.get(p["TBGCNUMMER"].strip())
+    if rr:
+        b=rr[0] or b
+        if rr[1:]==("rebuilt",): by=b; st=4                                         # built anew here
+        else:                                                                       # moved here: original build year (followed back through earlier moves), standing here since b
+            by,src=ORIG_BY.get(p["TBGCNUMMER"].strip(),(0,None))
+            while src in ORIG_BY: by,src=ORIG_BY[src]
+            st=11
     if not b: b0,b1=1600,1850; fl|=4
     else: b0=b1=b
-    add(lon,lat,b0,b1,9999,9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),b,0,st,p["TBGCNUMMER"])
+    add(lon,lat,b0,b1,9999,9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),by,0,st,p["TBGCNUMMER"])
 for f in json.load(open(D+"/weidemolens.geojson"))["features"]:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
     if p["status"]=="verdwenen": continue
@@ -306,9 +320,23 @@ if os.path.exists(D+"/drgmk_molens_gemalen.geojson"):
         used.add(i); DRL+=[i,k,DRS.index(src)]
 print("drainage links",len(DRL)//3,"of which mills only on old maps (added, undated)",nadd)
 
+# moves as record pairs (for "moved here in …" at the new site)
+tbi={}
+for i,t in enumerate(tbs):
+    if t and recs[i*8+6]<5: tbi.setdefault(t.strip(),i)
+MVL=[]
+for a,b2 in MVLINK:
+    if a.strip() in tbi and b2 in tbi: MVL+=[tbi[a.strip()],tbi[b2]]
+# the same mill must not stand in two places: at its new site it appears from the move, not from its original build year
+late=0
+for q in range(0,len(MVL),2):
+    i,j=MVL[q],MVL[q+1]; e=meta[i*5+3]
+    if e and recs[j*8+2]<e and not recs[j*8+7]&64:
+        recs[j*8+2]=recs[j*8+3]=e; recs[j*8+7]&=~4; late+=1
+print("move links",len(MVL)//2,"new sites moved forward to the move year",late)
 print("records",len(names),"dropped",drop,"moves",len(moves)//5,"vocab",len(VNL))
 _buf=io.StringIO()
-json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT,"drl":DRL,"drs":DRS},_buf,separators=(",",":"),ensure_ascii=False)
+json.dump({"W":W,"H":H,"geo":[LON0,LON1,LAT0,LAT1,K],"img":imgs,"r":recs,"m":meta,"n":names,"tb":tbs,"vnl":VNL,"ven":VEN,"mv":moves,"mvl":MVL,"site":SITE,"sites":sites,"next":NEXT,"splace":SPLACE,"ssize":SIZE_FULL,"dmimg":DMIMG,"dm":DMT,"drl":DRL,"drs":DRS},_buf,separators=(",",":"),ensure_ascii=False)
 
 _js=_buf.getvalue()
 with open(OUT,"w") as f:

@@ -16,6 +16,8 @@ const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').ma
 // which drained lake a mill or pumping station helped drain (RCE): record → lake index (1-based, as DM), source map
 const DRL=DATA.drl||[],DRS=DATA.drs||[],RPOL=new Int16Array(N),RSRC=new Int16Array(N).fill(-1),POLREC={};
 for(let q=0;q<DRL.length;q+=3){const i=DRL[q],k=DRL[q+1];RPOL[i]=k;RSRC[i]=DRL[q+2];(POLREC[k]=POLREC[k]||[]).push(i);}
+// moves as record pairs: new site → the record it came from (for "moved here in …")
+const MVL=DATA.mvl||[],MVFROM=new Map();for(let q=0;q<MVL.length;q+=2)MVFROM.set(MVL[q+1],MVL[q]);
 let undOn=0;   // undated records (FL 64): outside the timeline, shown at every year when switched on
 function pres(i,t){
   if(FL[i]&64)return undOn;
