@@ -5,8 +5,12 @@ const PAL=[null,null,[26,31,36],[40,35,27],[46,54,38],[31,34,35],[58,50,43],[56,
 const KEYS=[1250,1500,1850,2000],LAND={},MASK={};let polderOn=false;let landReady=0;
 const DM=DATA.dm||[],DMC=document.createElement('canvas');DMC.width=W;DMC.height=H;const dmx=DMC.getContext('2d');
 let dmReady=false,dmVer=0,dmData=null,dmPix=null,dmBox=null,dmState=new Int8Array(DM.length+1).fill(-1);
-// state: 0 no override (before 1500, or 'before 1550' with unknown year), 1 lake, 2 drained
-const dmWant=(j,tt)=>{const d=DM[j-1];if(tt<1500)return 0;if(d[2])return tt<1550?0:2;return tt<d[1]?1:2;};
+// When each lake formed is not known, only when it was drained. So the lakes fade in over 1250–1500, in step with the
+// landscape maps (1250 → 1500), instead of all appearing at once in 1500.
+const LAKE_IN=[1250,1500],LAKE_STEPS=10;
+// state: 0 no override (before 1250, or 'before 1550' with unknown year), 1…LAKE_STEPS lake at that strength, -2 drained
+const dmWant=(j,tt)=>{const d=DM[j-1];if(d[2])return tt<1550?0:-2;if(tt>=d[1])return -2;if(tt<LAKE_IN[0])return 0;
+  return Math.max(1,Math.min(LAKE_STEPS,Math.round((tt-LAKE_IN[0])/(LAKE_IN[1]-LAKE_IN[0])*LAKE_STEPS)));};
 // lakes that were open sea before they were drained (Zuiderzee polders) get no 'lake' patch: the sea shows through
 const CLS={},seaLake=new Uint8Array(DM.length+1);let seaDone=false;
 function markSeaLakes(){if(seaDone||!dmReady||!CLS[1850])return;const c=CLS[1850];
@@ -24,8 +28,8 @@ function startLakes(){ // started from 13-main.js once every script is loaded
 function updateDM(all){
   if(!dmReady)return;const d=dmData.data;let changed=false,x0=W,y0=H,x1=0,y1=0;
   for(let k=1;k<=DM.length;k++){const w=dmWant(k,t);if(!all&&w===dmState[k])continue;dmState[k]=w;changed=true;
-    const col=w===0||(w===1&&seaLake[k])?null:w===1?(polderOn?DMCOL.lakeP:DMCOL.lake):(polderOn?DMCOL.landP:DMCOL.land),list=dmPix[k];
-    for(let q=0;q<list.length;q++){const o=list[q]*4;if(col){d[o]=col[0];d[o+1]=col[1];d[o+2]=col[2];d[o+3]=255;}else d[o+3]=0;}
+    const lake=w>0,col=w===0||(lake&&seaLake[k])?null:lake?(polderOn?DMCOL.lakeP:DMCOL.lake):(polderOn?DMCOL.landP:DMCOL.land),a=lake?Math.round(255*w/LAKE_STEPS):255,list=dmPix[k];
+    for(let q=0;q<list.length;q++){const o=list[q]*4;if(col){d[o]=col[0];d[o+1]=col[1];d[o+2]=col[2];d[o+3]=a;}else d[o+3]=0;}
     const bx=dmBox[k];if(bx[0]<x0)x0=bx[0];if(bx[1]<y0)y0=bx[1];if(bx[2]>x1)x1=bx[2];if(bx[3]>y1)y1=bx[3];}
   if(changed&&x1>=x0){dmx.putImageData(dmData,0,0,x0,y0,x1-x0+1,y1-y0+1);dmVer++;}
 }
