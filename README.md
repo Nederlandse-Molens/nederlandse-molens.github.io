@@ -36,6 +36,7 @@ fonts/              Inter Tight, self-hosted (no requests to Google)
 tools/prep.py       builds data/data.js from the source downloads
 tools/tr.py         Dutch to English vocabulary for mill types and functions
 tests/smoke.py      loads the page in a headless browser and fails on JS errors
+WATCHLIST.md        mills changed by hand that are worth checking again later
 ```
 
 Order matters: each script may use what the earlier ones define. Anything that starts work asynchronously (image loading, timers) is kicked off from `13-main.js`, after every script has loaded.

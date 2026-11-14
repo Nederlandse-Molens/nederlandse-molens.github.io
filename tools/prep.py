@@ -72,6 +72,9 @@ MOVED_TO={
  "00067":("12220",2009),          # De Kalkmolen: taken down in Leiderdorp 9 February 2006, re-erected in Hoogmade end 2009
 }
 REERECTED={v[0]:v[1:] for v in MOVED_TO.values()}
+# corrections to standing mills, checked by hand (see WATCHLIST.md for the ones to look at again)
+BUILT={"01420":1849}   # Ceres, Bovenkarspel: no build year in the export; built here in 1849, a mill moved from the Zaan region (molendatabase.nl)
+GONE={"03034":2026}    # De Slagdijkstermolen, Oude Leije near Stiens: burnt down in the night of 13–14 November 2026 (NOS)
 def drive(q):   # wind, water or muscle, for both the lost-mill and the standing-mill files
     d=(q.get("aandrijvin") or q.get("CATEGORIE") or "").lower()
     return "water" if d.startswith(("water","getij")) and "wind" not in d else "muscle" if d.startswith(("ros","tred","hond","koe")) else "wind"
@@ -125,7 +128,7 @@ for f in LOST:
 for f in json.load(open(D+"/molens.geojson"))["features"]:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
     if p["STAAT"]=="in aanbouw": continue
-    b=yr(p["BOUWJAAR"]); fl=1; cat=p["CATEGORIE"]
+    b=BUILT.get(p["TBGCNUMMER"].strip()) or yr(p["BOUWJAAR"]); fl=1; cat=p["CATEGORIE"]
     kind=0 if p["HFDFUNCTIE"]=="poldermolen" else 1
     if cat=="watervluchtmolen": fl|=32   # watervluchtmolen (wind- and watermill in one): drawn as a windmill
     elif cat.startswith("ros") or cat in("tredmolen","hondenkarn","koemolen"): kind=2
@@ -143,7 +146,9 @@ for f in json.load(open(D+"/molens.geojson"))["features"]:
             st=11
     if not b: b0,b1=1600,1850; fl|=4
     else: b0=b1=b
-    add(lon,lat,b0,b1,9999,9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),by,0,st,p["TBGCNUMMER"])
+    e=GONE.get(p["TBGCNUMMER"].strip(),0)
+    if e: fl&=~1; st=0                                                              # lost after the export was made
+    add(lon,lat,b0,b1,e or 9999,e or 9999,kind,fl,p["NAAM"],vi(p["TYPE"]),vi(p["FUNCTIE"]),by,e,st,p["TBGCNUMMER"])
 for f in json.load(open(D+"/weidemolens.geojson"))["features"]:
     p=f["properties"]; lon,lat=f["geometry"]["coordinates"][:2]
     if p["status"]=="verdwenen": continue
